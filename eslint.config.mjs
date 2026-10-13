@@ -5,7 +5,7 @@ export default [
   { ignores: ['.next/**', 'node_modules/**', 'next-env.d.ts'] },
   js.configs.recommended,
   {
-    files: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}'],
+    files: ['app/**/*.{ts,tsx}', 'components/**/*.{ts,tsx}', 'lib/**/*.ts'],
     languageOptions: {
       parser,
       parserOptions: { ecmaFeatures: { jsx: true } },
