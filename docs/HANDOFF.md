@@ -1,5 +1,13 @@
 # City Money — continuation checkpoint
 
+## Latest founder-film instruction — 13 October, 22:00 UTC
+
+Emma approved the revised founder script and6,000 included ElevenLabs-credit ceiling: “proceed with that (remove the \"it is this, not that\" style it's ai-ish and don't use the word receipt) manage our usage carefully so we don't hit limit fast and also add subtitles nicely formatted in our demo.” Revision3 in `docs/FOUNDER_SCRIPT.md` removes the contrast formulations and the word receipt from spoken text. App transaction terminology is unchanged. Add synchronized, high-contrast two-line captions with safe padding and export SRT. No bouncing/karaoke words. Conserve agent usage: batch shell work, one sample, one generation per scene, targeted corrections and one concise UI testing/capture handoff.
+
+Film workspace `/home/ubuntu/city-money-film` contains `generate_voice.py`, `script.json`, six narration scenes, and a hard6000-character budget ledger in `usage.json` that reserves attempted input before requests and refuses silent retry after an uncertain request. One143-character pronunciation sample is generated in `audio/pronunciation-sample.mp3` using Emma’s clone and eleven_multilingual_v2. Account was Starter, included28235 credits available, overage disabled (`max_credit_limit_extension=0`). Sample charge was not visible immediately; do not mistake delayed accounting for free generation. Voice/film rendering and UI validation are in progress. Full scene generation awaits the sample pronunciation check. Render assets stay outside app public/Git to avoid burdening app deploys; source/docs will be checkpointed.
+
+Prior UI handoff did not start due to ChatGPT-sharing subscription limit; try once with the updated focused scope. Do not keep retrying if blocked. Source remains deployed84c9d5f; no revised-checkout browser validation has yet occurred. Public availability last checked21, funding125CITYCM total. No merge/submission or external purchase.
+
 ## Active finish pass — 13 October, 21:10 UTC
 
 ### Latest finish checkpoint — 21:26 UTC
