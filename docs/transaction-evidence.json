@@ -43,6 +43,20 @@
       "gasUsed": "300000",
       "confirmedAt": "2026-10-13T18:15:04.560Z"
     },
+    "checkoutPayment": {
+      "hash": "0xf7867b4baf3d41363f98b916c0a67c803bb518018ec88e41b420e0dba5c2acad",
+      "amount": "1.0",
+      "from": "0x0a84Ee5fed17248bdb0998A5ff186830db19c4e9",
+      "to": "0x392Cb28F06BED7096783cCbD49aBFa2B50646838",
+      "status": 1,
+      "blockNumber": 70763567,
+      "blockTimestamp": "2026-10-13T19:23:56.000Z",
+      "nonce": 2,
+      "gasUsed": "263679",
+      "feeMON": "0.026895258",
+      "source": "One actual 1-credit payment confirmed through the deployed browser checkout; participant-only server signer",
+      "transferEventVerified": true
+    },
     "rejection": {
       "hash": "0xd0e56e57f39f58fd114f894e3bbbb74afa00853d424bc852760480fdd7f66c77",
       "amount": "1.0",
@@ -97,6 +111,33 @@
       "participant": "15.0",
       "merchant": "5.0",
       "outsider": "0.0"
+    },
+    "checkoutPayment": {
+      "source": "Monad RPC historical token reads, receipt status and exact CVA Transfer event",
+      "beforeBlock": 70763566,
+      "afterBlock": 70763567,
+      "before": {
+        "supply": "20.0",
+        "participant": "15.0",
+        "merchant": "5.0",
+        "outsider": "0.0"
+      },
+      "after": {
+        "supply": "20.0",
+        "participant": "14.0",
+        "merchant": "6.0",
+        "outsider": "0.0"
+      },
+      "remainingLiveCheckoutsAtVerification": 1,
+      "checkedAt": "2026-10-13T19:27:34.361Z"
+    },
+    "boundaryAfterCheckout": {
+      "result": "rejected",
+      "ruleValue": 69,
+      "identityLevel": 1,
+      "checkedAt": "2026-10-13T19:27:34.361Z",
+      "method": "eth_call — no transaction was broadcast",
+      "minedWitness": "0xd0e56e57f39f58fd114f894e3bbbb74afa00853d424bc852760480fdd7f66c77"
     },
     "rejectionPreflight": {
       "amount": "1.0",

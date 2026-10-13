@@ -1,19 +1,36 @@
 # City Money — judge walkthrough
 
-**Current public site:** https://city-money.vercel.app · free Vercel Hobby · Monad testnet 10143. The site is an **evidence viewer**, not an interactive checkout. No public minting, signing or CVI-administration controls exist in this revision. Emma has not approved a hackathon submission or a merge.
+**Live app:** https://city-money.vercel.app · **public recording:** https://city-money-demo.vercel.app · **direct MP4:** https://city-money-demo.vercel.app/city-money-live-demo.mp4.
 
-## 75-second narration and screen route
+The Next.js app supports an explicitly approved bounded checkout, not just receipt inspection. Only a prepared participant test-wallet key is held server-side; the issuer/admin key is not deployed. Free Vercel Hobby, Monad testnet 10143, no real money. Emma has not approved submission or a merge.
 
-| Time | Screen and narration | Actual evidence |
+## Recorded actual journey
+
+The public video is an **88-second, real-time, unnarrated screen capture**, not a simulated payment or accelerated latency claim. It shows the actual 1-credit checkout, its successful explorer receipt, the fresh read-only outsider test and the separate earlier mined failed receipt. An annotated shorter testing edit is available in the originating Devin session; it is not the real-time public version.
+
+The actual checkout hash is [`0xf7867b4baf3d41363f98b916c0a67c803bb518018ec88e41b420e0dba5c2acad`](https://testnet.monadscan.com/tx/0xf7867b4baf3d41363f98b916c0a67c803bb518018ec88e41b420e0dba5c2acad), receipt status **1**, block **70763567**, nonce **2**. Historical reads at blocks 70763566 and 70763567 and the CVA Transfer event confirm participant **15→14**, merchant **5→6**, outsider **0**, supply **20**. Fee: **0.026895258 test MON**. Refresh/reload restored and rechecked the same receipt; it did not send another payment.
+
+## 75–90-second story / optional narration
+
+| Time | Screen and narration | Honest evidence |
 | --- | --- | --- |
-| 0–12s | Landing hero: “What if a local benefit stayed local? City Money is a **fictional** test-credit program, not a city budget or real money.” | Original art; sandbox disclaimer visible. |
-| 12–26s | Scroll through receive → spend → boundary. “A genuine Cleanverse CVA checks a wallet’s test identity in the token transfer. Our prepared participant received 20 credits, then paid 5 to Corner Table.” | [Mint status 1](https://testnet.monadscan.com/tx/0xd8f0bc7a9916ffb62d6ae4cb8bc05a90dae24c83421b7f5651f553aed93d644e) · [merchant payment status 1](https://testnet.monadscan.com/tx/0xe7a0b0f665acfa70d04b4e58f0abb85b2cf14faf102b3074afe4a36709b68f9e). |
-| 26–42s | Enter workspace and refresh the live balance. “The participant now has 15; the merchant 5; the outsider 0. These are live token reads, not seeded UI values.” | `/api/state` reads the real CVA supply and all three balances. Identity levels shown alongside them are **registration snapshots**, not live identity reads. |
-| 42–65s | Click **See proof**, then the rejected transfer. “The participant tried to send 1 credit to the level-1 test outsider. The mined transaction failed at the Cleanverse policy verifier. The trace includes the outsider address, configured rule value 69 and observed level 1; no token balance changed.” | [Reverted receipt status 0](https://testnet.monadscan.com/tx/0xd0e56e57f39f58fd114f894e3bbbb74afa00853d424bc852760480fdd7f66c77) · [trace and before/after balances](transaction-evidence.json). |
-| 65–75s | Return to the site: “The contract, not a hidden button, drew the boundary. The identities and program are sandbox fixtures—this is not real KYC or residency verification.” | `docs/fixture-evidence.json` and [issued CVA](https://testnet.monadscan.com/address/0x78e12fC329564D6E28d79ed81a009c0215d5Ec8D). |
+| 0–10s | Landing: “What if a local benefit stayed local? City Money is a fictional test-credit program, not a city budget or real money.” | Original A+B art; sandbox disclaimer. |
+| 10–20s | Enter workspace: “A genuine Cleanverse CVA on Monad allocated 20 credits. A prepared participant already paid 5 to Corner Table.” | [Mint status 1](https://testnet.monadscan.com/tx/0xd8f0bc7a9916ffb62d6ae4cb8bc05a90dae24c83421b7f5651f553aed93d644e), [initial payment status 1](https://testnet.monadscan.com/tx/0xe7a0b0f665acfa70d04b4e58f0abb85b2cf14faf102b3074afe4a36709b68f9e). These are earlier real transactions, not new allocations during the video. |
+| 20–45s | Amount **1 → Review → Confirm**: “Only this merchant, a small amount and the prepared participant can be used. The server waits for a real receipt before showing success.” | Recorded actual payment; no issuer key, public mint or user-wallet connection. |
+| 45–60s | Receipt/explorer: “One credit moved: participant 15 to 14, merchant 5 to 6. Here is the actual successful Monad receipt.” | Status 1, exact recipient, amount and Transfer event. Those are the recorded before/after balances; later live reads may differ. |
+| 60–80s | Boundary panel: “Now a fresh read-only call asks whether the lower-level outsider can receive. The contract rejects level 1 against rule 69, without broadcasting. This separate earlier transaction also actually failed on-chain.” | Fresh **eth_call**, plus [mined rejection status 0](https://testnet.monadscan.com/tx/0xd0e56e57f39f58fd114f894e3bbbb74afa00853d424bc852760480fdd7f66c77). The trace and unchanged historical balances are in [transaction evidence](transaction-evidence.json). |
+| 80–90s | Close: “The token contract draws the boundary, not a hidden button. All identities and credits are sandbox fixtures.” | Identity labels in the UI are registration snapshots, not live CVI queries. |
 
-**Do not say:** viewers can execute checkout on this site. The listed payment was genuinely executed from the prepared test wallet by the operator, and the public UI lets viewers inspect its receipt; the disabled checkout is intentional until a safe, explicitly approved signing design is deployed. Do not imply government sponsorship, fiat backing, cash redemption, automatic token expiry, production compliance, or verified real-world residence. Level 69's exact inclusivity is not established by our positive 70 / negative 1 test case; Cleanverse docs conflict on that boundary. No arbitrary $/time savings or speed claims.
+## A judge trying it now
 
-## Hand-off for the ≤3-minute submission video
+After verification **one shared live checkout remained**, not one payment per person. Check current availability first. If it remains, choose 1–5 whole credits, review the fixed merchant and confirm once. Do not promise 15→14 again: start with current live balances. If exhausted or unavailable, inspect the genuine recorded payment and use the read-only boundary. There is no public reset or remint, and no automatic retry after an uncertain outcome.
 
-The authorized browser walkthrough is in the originating Devin session; it is not a public video URL. If Emma chooses this evidence-only version, record and trim a final ≤3-minute walkthrough following the route above, publish that video through an approved free venue, and verify the public video opens without login before submission. If interactive checkout is approved, update this script and re-record the new **actual** flow. Emma retains final submission control before the October 14, 03:59 UTC deadline.
+Do not record another payment just to improve the video. A replay of an existing receipt must be labelled a replay, never a newly executed transfer. The existing public capture preserves the real action for judges who arrive after the shared slot is used.
+
+## Verification and limits
+
+Deployed checkout passed desktop, 390×844 and 320×844 layout/confirmation checks, invalid 0/6 amount gating, pending disabled controls, receipt restoration, keyboard focus, neutral delayed loading, offline/recovery and reduced motion. One payment only was sent. Exhaustion, concurrent confirmations, interrupted POST recovery and forced server-side RPC failure were not browser-tested; preserving the final judge checkout took priority. Source limit tests and Origin/body guards were checked separately.
+
+Never imply government sponsorship, fiat backing, cash redemption, automatic token expiry, production compliance, verified residence, or a unique city allowlist. The issued rule is an identity-level threshold; another qualifying identity may satisfy it. The docs disagree about exact level-69 inclusivity, which the positive 70 / negative 1 fixtures do not resolve. No fabricated time/money savings.
+
+**Publication boundary:** the video is public evidence, not a submitted hackathon entry. Emma retains the final submission decision. The recorded deadline is October 14, **03:59 UTC**. Optional narration above remains a script, not audio already present in the recording.
