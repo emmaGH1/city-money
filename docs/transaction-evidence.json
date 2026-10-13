@@ -261,6 +261,28 @@
     "reloadWithoutBroadcast": true,
     "localStorageFailureBroadcasts": 0,
     "independentLatestNonce": 5,
-    "note": "Two approved QA payments. Founder payment still unused; no additional QA spending authorized."
+    "note": "Two approved QA payments before the separate founder payment; do not spend again for QA."
+  },
+  "founderFilmedPayment": {
+    "revision": "db4e693",
+    "hash": "0x15466231d1cb4c6953a7f447a9e63d7eabad88144682d1e3ba0b7e31c16c37db",
+    "status": 1,
+    "block": 70799023,
+    "nonce": 5,
+    "latestParticipantNonce": 6,
+    "sender": "0x0a84Ee5fed17248bdb0998A5ff186830db19c4e9",
+    "contract": "0x78e12fC329564D6E28d79ed81a009c0215d5Ec8D",
+    "recipient": "0x392Cb28F06BED7096783cCbD49aBFa2B50646838",
+    "rawAmount": "1000000",
+    "transferEventCount": 1,
+    "transferEventLogIndex": 30,
+    "feeTestMON": "0.026895258",
+    "before": { "supply": "125.0", "participant": "117.0", "merchant": "8.0", "outsider": "0.0", "remainingPublic": 19 },
+    "after": { "supply": "125.0", "participant": "116.0", "merchant": "9.0", "outsider": "0.0", "remainingPublic": 18 },
+    "prepareCount": 1,
+    "broadcastCount": 1,
+    "verifiedResponseSeconds": 4.85,
+    "verifiedBalanceUpdateSeconds": 5.07,
+    "note": "Captured in one original-speed native-cursor take. A previously restored QA confirmation in the pre-payment workspace was historical, not this transaction; the film shows the actual new hash after confirmation."
   }
 }
