@@ -1,0 +1,7 @@
+.env*
+wallets*
+*.enc
+*.tsbuildinfo
+coverage/
+scripts/
+docs/HANDOFF.md
