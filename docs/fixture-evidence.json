@@ -6,7 +6,10 @@
   "symbol": "CITYCM",
   "decimals": 6,
   "programMinimumSubTier": 69,
+  "adminAddress": "0x9E6BeB50643F0598303B040fb6F1086621252421",
   "issuanceTx": "0xea8ee6b36e7a4abfd17dd0b6e55a4f1e7e9ab6f21c65f2c7c0160485f8dc8d23",
+  "ruleAddedTx": "0x6c9614cf6d0292ef763d96d4edf234d566afb84badc8efcaf64f6155ecf48204",
+  "unsupportedSubgroupRemovedTx": "0xf3713a526a64051786bafa9215479ac3c81f212845f4580ad4d3200caaf2877a",
   "roles": {
     "participant": {
       "address": "0x0a84Ee5fed17248bdb0998A5ff186830db19c4e9",

@@ -23,7 +23,7 @@ export async function GET() {
       token.balanceOf(fixture.roles.merchant.address),
       token.balanceOf(fixture.roles.outsider.address),
       provider.getBalance(fixture.roles.participant.address),
-      provider.getBalance('0x9E6BeB50643F0598303B040fb6F1086621252421'),
+      provider.getBalance(fixture.adminAddress),
     ]);
 
     if (symbol !== fixture.symbol) throw new Error('Unexpected CVA');
@@ -46,6 +46,7 @@ export async function GET() {
         merchant: fixture.roles.merchant.cvi.subTier,
         outsider: fixture.roles.outsider.cvi.subTier,
         minimum: fixture.programMinimumSubTier,
+        source: 'registration fixture snapshot, not a live CVI query',
       },
     }, { headers: { 'Cache-Control': 'no-store, max-age=0' } });
   } catch {

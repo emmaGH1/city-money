@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CityScene } from '../../components/CityScene';
+import evidence from '../../docs/fixture-evidence.json';
 
 type State = {
   block: number;
@@ -13,7 +14,7 @@ type State = {
   balances: { participant: string; merchant: string; outsider: string };
   gas: { participant: string; admin: string };
   wallets: { participant: string; merchant: string; outsider: string };
-  eligibility: { participant: number; merchant: number; outsider: number; minimum: number };
+  eligibility: { participant: number; merchant: number; outsider: number; minimum: number; source: string };
 };
 
 function shortAddress(address: string) {
@@ -49,38 +50,46 @@ export default function Workspace() {
     return () => controller.abort();
   }, [refresh]);
 
-  const funded = state && Number(state.balances.participant) > 0;
+  const funded = state && !loading && Number(state.balances.participant) > 0;
   return (
     <main className="workspace">
       <header className="site-header workspace-header">
         <Link href="/" className="wordmark"><span className="logo-mark" aria-hidden="true">⌂</span> CITY MONEY<span className="wordmark-period">.</span></Link>
         <span className="workspace-header-label">NEIGHBORHOOD SANDBOX <span aria-hidden="true">·</span> MONAD TESTNET</span>
-        <Link className="back-link" href="/">← Back to the story</Link>
+        <a className="receipt-nav" href="#receipts">See proof ↓</a>
+        <Link className="back-link" href="/"><span className="back-link-full">← Back to the story</span><span className="back-link-short">← Story</span></Link>
       </header>
       <div className="workspace-wrap">
-        <div className="workspace-intro"><p className="eyebrow">01 / THE NEIGHBORHOOD</p><h1>Your little corner<br /><em>of the city.</em></h1><p>One fictional program. One prepared participant. One eligible corner shop. Nothing here represents real money or real identity verification.</p></div>
+        <div className="workspace-intro"><p className="eyebrow">01 / THE NEIGHBORHOOD</p><h1>Your little corner<br /><em>of the city.</em></h1><p>One fictional program. One prepared participant. One test merchant whose recorded identity meets the configured level. Nothing here represents real money or real identity verification.</p></div>
         <div className="workspace-columns">
           <section className="merchant-panel" aria-labelledby="merchant-heading">
             <div className="merchant-panel-top"><span>CORNER NO. 01 / 01</span><span className="merchant-mark">LOCAL SPOT <span aria-hidden="true">↗</span></span></div>
             <div className="merchant-illustration"><span className="merchant-orbit" aria-hidden="true">✳</span><CityScene compact /><span className="merchant-caption">A GOOD PLACE<br />TO STOP BY.</span></div>
-            <div className="merchant-panel-bottom"><div><p className="eyebrow">A FICTIONAL DEMO MERCHANT</p><h2 id="merchant-heading">Corner Table</h2><p>Prepared sandbox wallet · eligible in the test program</p></div><span className="merchant-number">01</span></div>
+            <div className="merchant-panel-bottom"><div><p className="eyebrow">A FICTIONAL DEMO MERCHANT</p><h2 id="merchant-heading">Corner Table</h2><p>Prepared wallet · registration fixture level {evidence.roles.merchant.cvi.subTier}</p></div><span className="merchant-number">01</span></div>
           </section>
           <section className="voucher-panel" aria-labelledby="voucher-heading">
             <div className="voucher-panel-top"><span>YOUR TEST VOUCHER</span><span>CM / 01</span></div>
             <p className="voucher-label">Available from the real CVA</p>
-            <h2 id="voucher-heading" className="voucher-value">{state ? state.balances.participant : loading ? '···' : '—'}<span> CITYCM</span></h2>
+            <h2 id="voucher-heading" className="voucher-value">{loading ? '···' : state ? state.balances.participant : '—'}<span> CITYCM</span></h2>
             <p className="voucher-footnote">{loading ? 'Reading Monad testnet…' : error ? 'Balance unavailable — do not assume funds exist.' : `On-chain at block ${state?.block.toLocaleString()}`}</p>
             <div className="voucher-divider" />
-            <div className="voucher-detail"><span>PARTICIPANT</span><span>{state ? shortAddress(state.wallets.participant) : 'Checking wallet…'}</span></div>
-            <div className="voucher-detail"><span>MERCHANT</span><span>{state ? shortAddress(state.wallets.merchant) : 'Checking wallet…'}</span></div>
-            <div className="voucher-detail"><span>ELIGIBILITY</span><span>Sandbox fixture · level 70</span></div>
-            <p className="voucher-warning">{loading ? 'Checking on-chain credits. No balance has been confirmed for this read yet.' : error || (funded ? 'Credits confirmed on-chain. Payment controls open only after a real transfer is configured.' : 'This participant wallet has no available credits. This is a live balance—not a simulated allocation.')}</p>
+            <div className="voucher-detail"><span>PARTICIPANT</span><a href={`https://testnet.monadscan.com/address/${evidence.roles.participant.address}`} target="_blank" rel="noopener noreferrer" aria-label="View prepared participant address on MonadScan" title={evidence.roles.participant.address}>{shortAddress(evidence.roles.participant.address)} ↗</a></div>
+            <div className="voucher-detail"><span>MERCHANT</span><a href={`https://testnet.monadscan.com/address/${evidence.roles.merchant.address}`} target="_blank" rel="noopener noreferrer" aria-label="View prepared merchant address on MonadScan" title={evidence.roles.merchant.address}>{shortAddress(evidence.roles.merchant.address)} ↗</a></div>
+            <div className="voucher-detail"><span>IDENTITY LEVEL</span><span>Registration fixture · {evidence.roles.participant.cvi.subTier}</span></div>
+            <p className="voucher-warning" role="status">{loading ? 'Checking on-chain credits. No balance has been confirmed for this read yet.' : error || (funded ? 'Credits confirmed on-chain. Payment controls open only after a real transfer is configured.' : 'This participant wallet has no available credits. This is a live balance—not a simulated allocation.')}</p>
             <button className="button-pay" type="button" disabled>Payment not yet available <span aria-hidden="true">↗</span></button>
             <button className="refresh-button" type="button" onClick={() => void refresh()} disabled={loading}>↻ Refresh chain balance</button>
           </section>
         </div>
-        <section className="boundary-panel" aria-labelledby="boundary-heading"><span className="boundary-index">02 / THE BOUNDARY</span><div><h2 id="boundary-heading">The rules travel with the credits.</h2><p>The registered outsider has a sandbox identity below this CVA’s minimum level. A zero-value preflight reverted at the actual Cleanverse token contract; a funded transfer and transaction receipt are not yet established.</p></div><a href={`https://testnet.monadscan.com/address/${state?.contract ?? '0x78e12fC329564D6E28d79ed81a009c0215d5Ec8D'}`} target="_blank" rel="noopener noreferrer">Inspect real CVA ↗</a></section>
-        <p className="workspace-fine-print">Sandbox identities were created without identity documents. Level is an issuer-assigned test attribute, not proof of residence. Readings can change: reload to verify. {state && `Last read ${new Date(state.verifiedAt).toLocaleString()}.`}</p>
+        <section className="boundary-panel" aria-labelledby="boundary-heading"><span className="boundary-index">02 / THE BOUNDARY</span><div><h2 id="boundary-heading">The rules travel with the credits.</h2><p>The registered outsider has a sandbox identity below this CVA’s configured min_sub_tier. A zero-value preflight reverted at the actual Cleanverse token contract; a funded transfer and transaction receipt are not yet established.</p></div><a href={`https://testnet.monadscan.com/address/${evidence.cva}`} target="_blank" rel="noopener noreferrer">Inspect real CVA ↗</a></section>
+        <section id="receipts" className="receipt-section" aria-labelledby="receipt-heading"><div className="receipt-intro"><p className="eyebrow">03 / THE PAPER TRAIL</p><h2 id="receipt-heading">The proof is in<br /><em>the receipt.</em></h2><p>These are confirmed setup transactions on Monad testnet. A zero-value preflight has no transaction hash. Payment and rejected-transfer receipts will appear only if real transactions are mined.</p></div><div className="receipt-list">
+          <a href={`https://testnet.monadscan.com/tx/${evidence.issuanceTx}`} target="_blank" rel="noopener noreferrer"><span>01 / ISSUANCE</span><strong>City Money CVA issued</strong><small>Confirmed · CITYCM · 6 decimals</small><span aria-hidden="true">↗</span></a>
+          <a href={`https://testnet.monadscan.com/tx/${evidence.roles.merchant.registrationTx}`} target="_blank" rel="noopener noreferrer"><span>02 / ELIGIBLE FIXTURE</span><strong>Merchant CVI registered</strong><small>Confirmed · test identity level 70 at registration</small><span aria-hidden="true">↗</span></a>
+          <a href={`https://testnet.monadscan.com/tx/${evidence.roles.outsider.registrationTx}`} target="_blank" rel="noopener noreferrer"><span>03 / BOUNDARY FIXTURE</span><strong>Outsider CVI registered</strong><small>Confirmed · test identity level 1 at registration</small><span aria-hidden="true">↗</span></a>
+          <div className="receipt-pending"><span>04 / PAYMENT</span><strong>Merchant transfer pending</strong><small>No mined payment is claimed in this build. The latest balance appears above.</small><span aria-hidden="true">…</span></div>
+          <div className="receipt-pending"><span>05 / REJECTION</span><strong>Funded rejection pending</strong><small>Only a zero-value read-only preflight has reverted so far.</small><span aria-hidden="true">…</span></div>
+        </div></section>
+        <p className="workspace-fine-print">Sandbox identities were created without identity documents. Registration levels are issuer-assigned test attributes, not live CVI reads or proof of residence. Balances are read from the token contract on refresh. {state && `Last balance read ${new Date(state.verifiedAt).toLocaleString()}.`}</p>
       </div>
     </main>
   );
