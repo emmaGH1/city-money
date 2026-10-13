@@ -1,0 +1,147 @@
+{
+  "chainId": 10143,
+  "contract": "0x78e12fC329564D6E28d79ed81a009c0215d5Ec8D",
+  "transactions": {
+    "grantMintRole": {
+      "hash": "0x754282ff26200a95e75bac5847793998bb859f9e244fbf48a831f9280e1ab51f",
+      "role": "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",
+      "grantee": "0x9E6BeB50643F0598303B040fb6F1086621252421",
+      "submittedAt": "2026-10-13T18:14:36.568Z",
+      "status": 1,
+      "blockNumber": 70749894,
+      "gasUsed": "150000",
+      "confirmedAt": "2026-10-13T18:14:40.880Z"
+    },
+    "mint": {
+      "hash": "0xd8f0bc7a9916ffb62d6ae4cb8bc05a90dae24c83421b7f5651f553aed93d644e",
+      "amount": "20.0",
+      "to": "0x0a84Ee5fed17248bdb0998A5ff186830db19c4e9",
+      "submittedAt": "2026-10-13T18:14:41.382Z",
+      "status": 1,
+      "blockNumber": 70749910,
+      "gasUsed": "300000",
+      "confirmedAt": "2026-10-13T18:14:45.706Z"
+    },
+    "participantGas": {
+      "hash": "0x8386524cc6680fb03f146606fbd8fdffa8bf6f78c1a1722543a26a53af69f616",
+      "amountMON": "0.25",
+      "to": "0x0a84Ee5fed17248bdb0998A5ff186830db19c4e9",
+      "submittedAt": "2026-10-13T18:14:46.046Z",
+      "status": 1,
+      "blockNumber": 70749926,
+      "gasUsed": "21000",
+      "confirmedAt": "2026-10-13T18:14:50.359Z"
+    },
+    "payment": {
+      "hash": "0xe7a0b0f665acfa70d04b4e58f0abb85b2cf14faf102b3074afe4a36709b68f9e",
+      "amount": "5.0",
+      "from": "0x0a84Ee5fed17248bdb0998A5ff186830db19c4e9",
+      "to": "0x392Cb28F06BED7096783cCbD49aBFa2B50646838",
+      "submittedAt": "2026-10-13T18:15:00.242Z",
+      "status": 1,
+      "blockNumber": 70749973,
+      "gasUsed": "300000",
+      "confirmedAt": "2026-10-13T18:15:04.560Z"
+    },
+    "rejection": {
+      "hash": "0xd0e56e57f39f58fd114f894e3bbbb74afa00853d424bc852760480fdd7f66c77",
+      "amount": "1.0",
+      "from": "0x0a84Ee5fed17248bdb0998A5ff186830db19c4e9",
+      "to": "0x10883008a0810467F1130F4F27c1A19e3EbFA240",
+      "submittedAt": "2026-10-13T18:15:20.356Z",
+      "status": 0,
+      "blockNumber": 70750037,
+      "gasUsed": "300000",
+      "confirmedAt": "2026-10-13T18:20:11.371Z"
+    }
+  },
+  "observations": {
+    "identities": {
+      "checkedAt": "2026-10-13T18:20:10.872Z",
+      "source": "Cleanverse sandbox Query CVI API",
+      "roles": {
+        "participant": {
+          "subTier": 70,
+          "status": 1,
+          "expirationTime": 1794504121
+        },
+        "merchant": {
+          "subTier": 70,
+          "status": 1,
+          "expirationTime": 1794504222
+        },
+        "outsider": {
+          "subTier": 1,
+          "status": 1,
+          "expirationTime": 1794504224
+        }
+      },
+      "rule": {
+        "min_sub_tier": 69
+      }
+    },
+    "afterPrepare": {
+      "supply": "20.0",
+      "participant": "20.0",
+      "merchant": "0.0",
+      "outsider": "0.0"
+    },
+    "beforePayment": {
+      "supply": "20.0",
+      "participant": "20.0",
+      "merchant": "0.0",
+      "outsider": "0.0"
+    },
+    "afterPayment": {
+      "supply": "20.0",
+      "participant": "15.0",
+      "merchant": "5.0",
+      "outsider": "0.0"
+    },
+    "rejectionPreflight": {
+      "amount": "1.0",
+      "from": "0x0a84Ee5fed17248bdb0998A5ff186830db19c4e9",
+      "to": "0x10883008a0810467F1130F4F27c1A19e3EbFA240",
+      "revertData": "0x81df448000000000000000000000000010883008a0810467f1130f4f27c1a19e3ebfa24000000000000000000000000000000000000000000000000000000000000000450000000000000000000000000000000000000000000000000000000000000001",
+      "eligibleMerchantSameAmount": true,
+      "before": {
+        "supply": "20.0",
+        "participant": "15.0",
+        "merchant": "5.0",
+        "outsider": "0.0"
+      },
+      "checkedAt": "2026-10-13T18:15:20.173Z"
+    },
+    "rejection": {
+      "before": {
+        "supply": "20.0",
+        "participant": "15.0",
+        "merchant": "5.0",
+        "outsider": "0.0"
+      },
+      "after": {
+        "supply": "20.0",
+        "participant": "15.0",
+        "merchant": "5.0",
+        "outsider": "0.0"
+      },
+      "balancesUnchanged": true,
+      "gasLimit": "300000",
+      "gasCharged": "300000",
+      "explanation": "Monad charges the declared gas limit, including for reverted calls (docs.monad.xyz/developer-essentials/gas-pricing). Equality here is not evidence of out-of-gas.",
+      "trace": {
+        "error": "execution reverted",
+        "revertDataMatchesPreflight": true,
+        "outsiderCviWasRead": true,
+        "policyVerifierReverted": true
+      },
+      "decodedWords": {
+        "selector": "0x81df4480",
+        "recipient": "0x10883008a0810467F1130F4F27c1A19e3EbFA240",
+        "threshold": 69,
+        "identityLevel": 1
+      },
+      "classification": "The issued CVA called its policy verifier, which queried the outsider CVI and reverted with recipient, configured threshold and observed level; same sender and amount passed merchant preflight."
+    }
+  }
+}
