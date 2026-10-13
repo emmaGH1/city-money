@@ -1,0 +1,11 @@
+{
+  "name": "city-money",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "probe": "node scripts/cleanverse-probe.mjs",
+    "test:probe": "node --test scripts/cleanverse-probe.test.mjs"
+  },
+  "dependencies": { "ethers": "6.17.0" }
+}
