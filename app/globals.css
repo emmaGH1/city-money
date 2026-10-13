@@ -28,7 +28,7 @@ button{font:inherit}
 .button-primary{display:inline-flex;align-items:center;gap:39px;background:var(--ink);color:#fdf7eb;padding:17px 18px 17px 23px;font-size:13px;font-weight:750;transition:transform .2s,background .2s}
 .button-primary:hover{transform:translateY(-3px);background:#436548}
 .button-primary span{font-size:21px;font-weight:400}
-.hero-disclaimer{font-size:10px;font-weight:650;letter-spacing:.015em;margin:21px 0 0;color:#555d4c}
+.hero-disclaimer{font-size:12px;font-weight:650;letter-spacing:.015em;margin:21px 0 0;color:#555d4c}
 .hero-voucher{position:absolute;z-index:2;left:clamp(-85px,2.5vw,42px);bottom:56px;width:252px;height:310px;background:#f8efdf;border:1.5px solid var(--ink);box-shadow:9px 11px 0 #26362921;transform:rotate(-11deg);padding:18px;display:flex;flex-direction:column;justify-content:space-between}
 .voucher-eyebrow,.voucher-bottom{display:flex;justify-content:space-between;gap:5px;font-size:7px;letter-spacing:.12em;font-weight:800}
 .voucher-town{font-family:Georgia,serif;font-size:30px;font-weight:700;line-height:.91;letter-spacing:-.07em;color:var(--clay);margin-top:22px}
@@ -37,7 +37,7 @@ button{font:inherit}
 .voucher-roof{position:absolute;bottom:-16px;left:24px;width:125px;height:105px;transform:rotate(45deg);background:#5e8063;border:8px solid #29372b}
 .voucher-rule{height:1px;background:var(--ink)}
 .hero-stamp{position:absolute;top:12%;left:10%;z-index:1;width:93px;height:93px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--clay);color:var(--clay);text-align:center;line-height:1.05;font-size:14px;font-weight:900;letter-spacing:-.06em;transform:rotate(14deg)}
-.hero-city{position:absolute;right:clamp(-110px,-4vw,-30px);bottom:25px;width:clamp(365px,39vw,580px);z-index:1;transform:rotate(2deg)}
+.hero-city{position:absolute;right:clamp(-100px,-4vw,-30px);bottom:25px;width:clamp(335px,34vw,490px);z-index:1;transform:rotate(2deg)}
 .city-scene{width:100%;height:auto;display:block;filter:drop-shadow(10px 10px 0 #384b382a)}
 .hero-ground{position:absolute;bottom:31px;height:20px;width:100%;border-bottom:3px solid #29372b;z-index:0;display:flex;justify-content:space-around;align-items:center}
 .hero-ground span{width:18px;height:18px;background:#e0b886;border:1px solid var(--ink);border-radius:50%}
@@ -77,13 +77,13 @@ button{font:inherit}
 .merchant-panel-bottom p:last-child{font-size:11px;margin:0;color:#5b685a}
 .merchant-number{font-family:Georgia,serif;font-size:53px;color:#9caa88;line-height:.8}
 .voucher-panel{background:#fffaf0;border:1px solid #a4aa96;padding:28px;display:flex;flex-direction:column;min-width:0}
-.voucher-panel-top{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;font-weight:800;color:var(--clay)}
+.voucher-panel-top{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.14em;font-weight:800;color:var(--clay)}
 .voucher-label{font-family:Georgia,serif;font-size:20px;margin:52px 0 10px;letter-spacing:-.025em}
 .voucher-value{font-family:Georgia,serif;font-size:clamp(48px,5vw,78px);line-height:1;letter-spacing:-.07em;font-weight:500;margin:0;white-space:nowrap}
 .voucher-value span{font-size:13px;font-family:Arial,sans-serif;font-weight:800;letter-spacing:.11em}
-.voucher-footnote{font-size:11px;color:#667568;margin:12px 0 44px}
+.voucher-footnote{font-size:12px;color:#667568;margin:12px 0 44px}
 .voucher-divider{height:1px;background:#c6cbb9;margin-bottom:17px}
-.voucher-detail{display:flex;justify-content:space-between;gap:13px;font-size:10px;padding:9px 0;letter-spacing:.035em}
+.voucher-detail{display:flex;justify-content:space-between;gap:13px;font-size:11px;padding:9px 0;letter-spacing:.035em}
 .voucher-detail span:first-child{font-weight:800;color:#586d5b;letter-spacing:.1em}
 .voucher-detail span:last-child{text-align:right;font-weight:650}
 .voucher-warning{margin:auto 0 16px;padding:19px 17px 0;border-top:1px solid #c6cbb9;font-size:12px;line-height:1.55;color:#755240}
@@ -96,7 +96,7 @@ button{font:inherit}
 .boundary-panel h2{font-family:Georgia,serif;font-weight:500;font-size:27px;letter-spacing:-.04em;margin:0 0 9px}
 .boundary-panel p{font-size:12px;line-height:1.6;margin:0;max-width:590px}
 .boundary-panel a{border-bottom:1px solid;font-size:11px;font-weight:800;justify-self:end;white-space:nowrap;padding-bottom:4px}
-.workspace-fine-print{margin:23px 0 0;font-size:10px;line-height:1.6;color:#5b6a5c}
+.workspace-fine-print{margin:23px 0 0;font-size:12px;line-height:1.6;color:#5b6a5c}
 @media(max-width:1050px){.hero h1{font-size:clamp(68px,8vw,90px)}.hero-city{width:390px;right:-75px}.hero-voucher{left:-62px;width:220px;height:275px}.hero-copy{max-width:610px}.hero-description{max-width:450px}.workspace-wrap{padding:60px 35px}.boundary-panel{grid-template-columns:110px 1fr}.boundary-panel a{grid-column:2;justify-self:start}}
 @media(max-width:760px){.site-header{height:68px;padding:0 20px}.site-header nav{gap:0}.site-header nav a:first-child{display:none}.site-header nav a:last-child{padding:10px;font-size:10px}.site-header nav a span{margin-left:4px}.wordmark{font-size:14px}.logo-mark{width:25px;height:25px;font-size:22px}.hero{height:auto;max-height:none;min-height:780px;display:block}.hero-copy{padding:95px 23px 382px;max-width:550px}.hero h1{font-size:clamp(58px,10.5vw,82px)}.hero-eyebrow{font-size:9px;line-height:1.4;margin-bottom:22px}.hero-description{font-size:14px;margin:27px auto 22px}.hero-city{width:375px;right:-62px;bottom:28px}.hero-voucher{left:-37px;bottom:55px;transform:rotate(-9deg) scale(.75);transform-origin:bottom left}.hero-stamp{top:24px;left:20px;width:65px;height:65px;font-size:10px}.hero-disclaimer{font-size:9px}.hero-ground{bottom:28px}.street-ribbon{font-size:8px;gap:7px;padding:18px 10px}.street-ribbon span:nth-child(even){font-size:16px}.preview-section{padding:90px 22px;min-height:auto;display:block}.preview-section>p{margin-top:30px}.site-footer{padding:24px 20px;font-size:8px}.workspace-header-label{display:none}.workspace-wrap{padding:50px 19px}.workspace-intro{margin-bottom:36px}.workspace-columns{grid-template-columns:1fr}.merchant-illustration{min-height:300px}.voucher-panel{min-height:520px}.boundary-panel{grid-template-columns:1fr;padding:27px;gap:12px}.boundary-panel a{grid-column:1}.workspace-fine-print{margin-bottom:30px}}
 @media(max-width:440px){.hero{min-height:810px}.hero-copy{padding:121px 17px 386px}.hero h1{font-size:clamp(51px,13vw,62px)}.hero-description{max-width:350px}.hero-city{width:340px;right:-100px}.hero-voucher{left:-16px;bottom:70px;transform:rotate(-9deg) scale(.63)}.street-ribbon span:nth-of-type(5){display:none}.site-footer{flex-direction:column}.workspace-intro h1{font-size:50px}.merchant-panel-bottom{padding:25px}.voucher-panel{padding:23px}.voucher-value{font-size:56px}}

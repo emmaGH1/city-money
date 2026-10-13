@@ -74,7 +74,7 @@ export default function Workspace() {
             <div className="voucher-detail"><span>PARTICIPANT</span><span>{state ? shortAddress(state.wallets.participant) : 'Checking wallet…'}</span></div>
             <div className="voucher-detail"><span>MERCHANT</span><span>{state ? shortAddress(state.wallets.merchant) : 'Checking wallet…'}</span></div>
             <div className="voucher-detail"><span>ELIGIBILITY</span><span>Sandbox fixture · level 70</span></div>
-            <p className="voucher-warning">{error || (funded ? 'Credits confirmed on-chain. Payment controls open only after a real transfer is configured.' : 'No credits minted yet. This is a live balance—not a simulated allocation.')}</p>
+            <p className="voucher-warning">{loading ? 'Checking on-chain credits. No balance has been confirmed for this read yet.' : error || (funded ? 'Credits confirmed on-chain. Payment controls open only after a real transfer is configured.' : 'This participant wallet has no available credits. This is a live balance—not a simulated allocation.')}</p>
             <button className="button-pay" type="button" disabled>Payment not yet available <span aria-hidden="true">↗</span></button>
             <button className="refresh-button" type="button" onClick={() => void refresh()} disabled={loading}>↻ Refresh chain balance</button>
           </section>
