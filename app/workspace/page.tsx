@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { CityScene } from '../../components/CityScene';
 import evidence from '../../docs/fixture-evidence.json';
 import transactions from '../../docs/transaction-evidence.json';
+import { signedPayment } from '../../lib/payment-intent';
+import { maxLivePayments } from '../../lib/demo-limits';
 
 type State = {
   block: number;
@@ -19,12 +21,23 @@ type State = {
 };
 
 type Checkout = { available: boolean; remaining: number; reason: string };
-type PaymentReceipt = { status: 'confirmed' | 'pending' | 'reverted' | 'unknown' | 'unconfirmed'; hash: string; explorer: string; message: string; amount?: string; block?: number };
+type PaymentReceipt = { status: 'confirmed' | 'pending' | 'reverted' | 'unknown' | 'unconfirmed' | 'superseded'; hash: string; explorer: string; message: string; amount?: string; block?: number };
+type PaymentIntent = { transaction: string; hash: string; nonce: number; amount: string };
+const intentStorage = 'city-money.payment-intent-v2';
+function paymentIntent(value: unknown): PaymentIntent | null {
+  if (!value || typeof value !== 'object') return null;
+  const intent = value as PaymentIntent;
+  try {
+    const signed = signedPayment(intent.transaction, { chainId: evidence.chainId, token: evidence.cva, participant: evidence.roles.participant.address, merchant: evidence.roles.merchant.address, firstNonce: 2, limit: maxLivePayments });
+    if (signed.hash !== intent.hash || signed.tx.nonce !== intent.nonce || String(signed.amount / 1000000n) !== String(Number(intent.amount))) return null;
+    return intent;
+  } catch { return null; }
+}
 
 function paymentReceipt(value: unknown): PaymentReceipt | null {
   if (!value || typeof value !== 'object') return null;
   const result = value as Record<string, unknown>;
-  if (typeof result.hash !== 'string' || !/^0x[\da-f]{64}$/i.test(result.hash) || result.explorer !== `https://testnet.monadscan.com/tx/${result.hash}` || typeof result.message !== 'string' || !['confirmed', 'pending', 'reverted', 'unknown', 'unconfirmed'].includes(String(result.status))) return null;
+  if (typeof result.hash !== 'string' || !/^0x[\da-f]{64}$/i.test(result.hash) || result.explorer !== `https://testnet.monadscan.com/tx/${result.hash}` || typeof result.message !== 'string' || !['confirmed', 'pending', 'reverted', 'unknown', 'unconfirmed', 'superseded'].includes(String(result.status))) return null;
   if (result.status === 'confirmed' && (typeof result.amount !== 'string' || !/^\d+(?:\.\d+)?$/.test(result.amount) || typeof result.block !== 'number')) return null;
   return result as PaymentReceipt;
 }
@@ -45,6 +58,7 @@ export default function Workspace() {
   const [payError, setPayError] = useState('');
   const [submissionUnknown, setSubmissionUnknown] = useState(false);
   const [receipt, setReceipt] = useState<PaymentReceipt | null>(null);
+  const [intent, setIntent] = useState<PaymentIntent | null>(null);
   const [checkingBoundary, setCheckingBoundary] = useState(false);
   const [boundaryResult, setBoundaryResult] = useState('');
   const confirmRef = useRef<HTMLButtonElement>(null);
@@ -84,11 +98,11 @@ export default function Workspace() {
     }
   }, []);
 
-  const recheckReceipt = useCallback(async (hash: string, signal?: AbortSignal) => {
+  const recheckReceipt = useCallback(async (hash: string, signal?: AbortSignal, nonce?: number) => {
     try {
-      const response = await fetch(`/api/checkout?receipt=${encodeURIComponent(hash)}`, { cache: 'no-store', signal: signal ?? AbortSignal.timeout(15000) });
+      const response = await fetch(`/api/checkout?receipt=${encodeURIComponent(hash)}${nonce === undefined ? '' : `&nonce=${nonce}`}`, { cache: 'no-store', signal: signal ?? AbortSignal.timeout(15000) });
       const result = paymentReceipt(await response.json());
-      if (result && !signal?.aborted) setReceipt(result);
+      if (result && !signal?.aborted) { setReceipt(result); if (['confirmed', 'reverted', 'superseded'].includes(result.status)) setSubmissionUnknown(false); }
     } catch {
       if (!signal?.aborted) setPayError('The last receipt cannot be rechecked right now. Inspect its explorer link before trying again.');
     }
@@ -98,6 +112,14 @@ export default function Workspace() {
     const controller = new AbortController();
     void refresh(controller.signal);
     try {
+      const saved = localStorage.getItem(intentStorage);
+      const recovered = saved ? paymentIntent(JSON.parse(saved)) : null;
+      if (recovered) {
+        setIntent(recovered);
+        setSubmissionUnknown(true);
+        void recheckReceipt(recovered.hash, controller.signal, recovered.nonce);
+        return () => controller.abort();
+      }
       const hash = sessionStorage.getItem('city-money.last-payment');
       if (hash && /^0x[\da-f]{64}$/i.test(hash)) void recheckReceipt(hash, controller.signal);
     } catch { /* Storage is optional; the receipt remains inspectable on-chain. */ }
@@ -106,15 +128,30 @@ export default function Workspace() {
 
   useEffect(() => { if (review) confirmRef.current?.focus(); }, [review]);
 
-  const sendPayment = async () => {
+  const sendPayment = async (retry?: PaymentIntent) => {
     setPaying(true);
     setPayError('');
+    let attemptedBroadcast = false;
     try {
-      const response = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount }), signal: AbortSignal.timeout(60000) });
+      let prepared = retry;
+      if (!prepared) {
+        const response = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'prepare', amount }), signal: AbortSignal.timeout(45000) });
+        const result = await response.json();
+        prepared = paymentIntent(result) ?? undefined;
+        if (!prepared) throw new Error('No signed payment was established.');
+        try { localStorage.setItem(intentStorage, JSON.stringify(prepared)); }
+        catch { setPayError('Browser storage is unavailable. No payment was broadcast; enable storage before paying.'); setReview(false); return; }
+        setIntent(prepared);
+      }
+      setSubmissionUnknown(true);
+      attemptedBroadcast = true;
+      setReceipt({ status: 'pending', hash: prepared.hash, explorer: `https://testnet.monadscan.com/tx/${prepared.hash}`, message: 'Submitting the saved payment and checking its real receipt.' });
+      const response = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'broadcast', transaction: prepared.transaction }), signal: AbortSignal.timeout(60000) });
       const result = await response.json();
       const actualReceipt = paymentReceipt(result);
       if (actualReceipt) {
         setReceipt(actualReceipt);
+        setSubmissionUnknown(!['confirmed', 'reverted', 'superseded'].includes(actualReceipt.status));
         try { sessionStorage.setItem('city-money.last-payment', actualReceipt.hash); } catch { /* Optional local history. */ }
       } else if (!response.ok) {
         setPayError(typeof result.error === 'string' ? result.error : 'No payment was confirmed. Refresh before trying again.');
@@ -125,8 +162,8 @@ export default function Workspace() {
       setReview(false);
       await refresh();
     } catch {
-      setSubmissionUnknown(true);
-      setPayError('Payment request interrupted; its outcome is unknown. Do not submit again blindly. Inspect the participant wallet and refresh the live balance.');
+      setSubmissionUnknown(attemptedBroadcast);
+      setPayError(attemptedBroadcast ? 'Payment request interrupted. Your exact payment is saved; recheck its hash or resend those same signed bytes. Do not create a new payment.' : 'A signed payment could not be prepared. No broadcast was attempted.');
       setReview(false);
     } finally {
       setPaying(false);
@@ -147,7 +184,7 @@ export default function Workspace() {
   };
 
   const funded = state && !loading && Number(state.balances.participant) > 0;
-  const unresolvedReceipt = receipt && !['confirmed', 'reverted'].includes(receipt.status);
+  const unresolvedReceipt = receipt && !['confirmed', 'reverted', 'superseded'].includes(receipt.status);
   const canPay = Boolean(funded && checkout?.available && !checkingCheckout && /^[1-5]$/.test(amount) && !paying && !submissionUnknown && !unresolvedReceipt);
   return (
     <main className="workspace">
@@ -174,12 +211,13 @@ export default function Workspace() {
             <div className="voucher-detail"><span>PARTICIPANT</span><a href={`https://testnet.monadscan.com/address/${evidence.roles.participant.address}`} target="_blank" rel="noopener noreferrer" aria-label="View prepared participant address on MonadScan" title={evidence.roles.participant.address}>{shortAddress(evidence.roles.participant.address)} ↗</a></div>
             <div className="voucher-detail"><span>MERCHANT</span><a href={`https://testnet.monadscan.com/address/${evidence.roles.merchant.address}`} target="_blank" rel="noopener noreferrer" aria-label="View prepared merchant address on MonadScan" title={evidence.roles.merchant.address}>{shortAddress(evidence.roles.merchant.address)} ↗</a></div>
             <div className="voucher-detail"><span>IDENTITY LEVEL</span><span>Registration fixture · {evidence.roles.participant.cvi.subTier}</span></div>
-            <p className="voucher-warning" role="status">{loading ? 'Checking on-chain credits. No balance has been confirmed for this read yet.' : error || (paying ? 'Submitting a real testnet payment. Nothing is marked paid until a receipt and exact balance changes are confirmed.' : checkingCheckout ? 'Credits read from the actual CVA. Checking the shared checkout budget…' : checkout?.available ? `Real credits confirmed. ${checkout.remaining} of two additional live checkouts remain for this shared test wallet.` : checkout?.reason || 'Live checkout cannot be confirmed; inspect the recorded receipts.')}</p>
+            <p className="voucher-warning" role="status">{loading ? 'Checking on-chain credits. No balance has been confirmed for this read yet.' : error || (paying ? 'Submitting a real testnet payment. Nothing is marked paid until a successful receipt and exact Transfer event are verified.' : checkingCheckout ? 'Credits read from the actual CVA. Checking the shared checkout budget…' : checkout?.available ? `Real credits confirmed. ${checkout.remaining} shared demo checkouts remain.` : checkout?.reason || 'Live checkout cannot be confirmed; inspect the recorded receipts.')}</p>
             {review ? <div className="checkout-confirm" role="group" aria-labelledby="confirm-heading"><h3 id="confirm-heading">A small payment.<br />A real transaction.</h3><dl><div><dt>AMOUNT</dt><dd>{amount} CITYCM</dd></div><div><dt>TO</dt><dd>Corner Table only</dd></div><div><dt>SIGNER</dt><dd>Prepared sandbox wallet</dd></div></dl><p>Monad testnet · maximum fee budget 0.06 test MON. The issuer key is not deployed.</p><button ref={confirmRef} className="button-pay" type="button" onClick={() => void sendPayment()} disabled={!canPay}>{paying ? 'Awaiting real confirmation…' : 'Confirm test payment'}<span aria-hidden="true">↗</span></button><button className="checkout-cancel" type="button" disabled={paying} onClick={() => { setReview(false); requestAnimationFrame(() => reviewRef.current?.focus()); }}>Back to amount</button></div> : <div className="checkout-entry"><label htmlFor="checkout-amount">TEST CREDITS <span>1–5, whole amounts</span></label><div className="checkout-amount"><input id="checkout-amount" type="number" inputMode="numeric" min="1" max="5" step="1" value={amount} disabled={paying || !checkout?.available} onChange={event => setAmount(event.target.value)} /><span>CITYCM</span></div><button ref={reviewRef} className="button-pay" type="button" disabled={!canPay} onClick={() => { setReview(true); setPayError(''); }}>{checkingCheckout || loading ? 'Checking checkout…' : checkout?.available ? 'Review payment' : 'Checkout unavailable'}<span aria-hidden="true">↗</span></button></div>}
             {payError && <p className="checkout-error" role="alert">{payError}</p>}
+            {intent && (submissionUnknown || unresolvedReceipt) && <div className="payment-recovery"><p>Your exact payment is saved on this device. Resending cannot create a second execution of its nonce.</p><button type="button" disabled={paying} onClick={() => void recheckReceipt(intent.hash, undefined, intent.nonce)}>Recheck saved payment</button><button type="button" disabled={paying} onClick={() => void sendPayment(intent)}>Resend this exact payment</button></div>}
             {receipt && <div className={`checkout-receipt ${receipt.status === 'confirmed' ? 'confirmed' : ''}`} role="status"><span>{receipt.status === 'confirmed' ? 'PAYMENT CONFIRMED' : receipt.status.toUpperCase()}</span><strong>{receipt.status === 'confirmed' ? `${receipt.amount} CITYCM reached Corner Table.` : receipt.message}</strong>{receipt.block && <small>Monad testnet · block {receipt.block.toLocaleString()}</small>}<a href={receipt.explorer} target="_blank" rel="noopener noreferrer">Inspect this transaction ↗</a>{unresolvedReceipt && <button type="button" className="refresh-button" onClick={() => void recheckReceipt(receipt.hash)}>Recheck receipt</button>}</div>}
             <button className="refresh-button" type="button" onClick={() => void refresh()} disabled={loading || checkingCheckout || paying}>↻ Refresh balance &amp; checkout</button>
-            <p className="checkout-disclosure">Shared test-wallet signing. Two extra payments total; max 5 CITYCM each, fixed merchant only. No public mint, issuer or identity-admin controls.</p>
+            <p className="checkout-disclosure">Shared test-wallet signing. A shared capped allowance; max 5 CITYCM per payment, fixed merchant only. No public mint, issuer or identity-admin controls.</p>
           </section>
         </div>
         <section className="boundary-panel" aria-labelledby="boundary-heading"><span className="boundary-index">02 / THE BOUNDARY</span><div><h2 id="boundary-heading">The rules travel with the credits.</h2><p>A funded 1-credit transfer to the level-1 outsider was mined and failed at the actual Cleanverse policy verifier. Its trace read the outsider CVI and returned the outsider address, rule value 69 and observed level 1. At that historical block, participant / merchant / outsider balances stayed 15 / 5 / 0.</p>{boundaryResult && <p className="boundary-result" role="status">{boundaryResult}</p>}</div><div className="boundary-actions"><button className="boundary-try" type="button" disabled={!funded || checkingBoundary || paying} onClick={() => void testBoundary()}>{checkingBoundary ? 'Reading the contract…' : 'Try outsider (read-only)'}</button><a href={`https://testnet.monadscan.com/tx/${transactions.transactions.rejection.hash}`} target="_blank" rel="noopener noreferrer">Inspect mined failure ↗</a></div></section>

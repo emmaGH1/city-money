@@ -1,138 +1,136 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
+import { cookies } from 'next/headers';
 import { Contract, FetchRequest, JsonRpcProvider, Wallet, formatUnits, getAddress, parseEther } from 'ethers';
 import fixture from '../../../docs/fixture-evidence.json';
 import proof from '../../../docs/transaction-evidence.json';
-import { checkoutAvailability, maxPaymentCredits, merchantCap, paymentAmount, type CheckoutSnapshot } from '../../../lib/demo-limits';
+import { checkoutAvailability, maxLivePayments, maxPublicPayments, maxPaymentCredits, merchantCap, paymentAmount, type CheckoutSnapshot } from '../../../lib/demo-limits';
+import { paymentInterface, signedPayment, transferMatches } from '../../../lib/payment-intent';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
-
-const request = new FetchRequest(fixture.rpcUrl);
-request.timeout = 10000;
-request.setThrottleParams({ maxAttempts: 1 });
-const provider = new JsonRpcProvider(request, fixture.chainId, { staticNetwork: true, cacheTimeout: -1 });
-const token = new Contract(fixture.cva, [
-  'function symbol() view returns (string)',
-  'function balanceOf(address) view returns (uint256)',
-  'function transfer(address,uint256) returns (bool)',
-  'event Transfer(address indexed from,address indexed to,uint256 value)',
-], provider);
+const transport = new FetchRequest(fixture.rpcUrl);
+transport.timeout = 10000;
+transport.setThrottleParams({ maxAttempts: 1 });
+const provider = new JsonRpcProvider(transport, fixture.chainId, { staticNetwork: true, cacheTimeout: -1 });
+const token = new Contract(fixture.cva, ['function symbol() view returns (string)', 'function decimals() view returns (uint8)', 'function balanceOf(address) view returns (uint256)', 'function transfer(address,uint256) returns (bool)'], provider);
+const policy = { chainId: fixture.chainId, token: fixture.cva, participant: fixture.roles.participant.address, merchant: fixture.roles.merchant.address };
 const maxMerchantBalance = merchantCap(proof.observations.afterPayment.merchant, fixture.decimals);
-let paymentInFlight = false;
-
-function json(body: object, status = 200) {
-  return Response.json(body, { status, headers: { 'Cache-Control': 'no-store, max-age=0', 'X-Content-Type-Options': 'nosniff' } });
-}
-
+function json(body: object, status = 200) { return Response.json(body, { status, headers: { 'Cache-Control': 'no-store, max-age=0', 'X-Content-Type-Options': 'nosniff' } }); }
 function signer() {
   const secret = process.env.CITY_MONEY_TEST_PARTICIPANT_PRIVATE_KEY;
-  if (!secret) return null;
+  if (!secret) throw new Error('Checkout is not configured.');
   const wallet = new Wallet(secret, provider);
-  if (getAddress(wallet.address) !== getAddress(fixture.roles.participant.address)) throw new Error('Prepared test-wallet configuration does not match the public fixture');
+  if (getAddress(wallet.address) !== getAddress(policy.participant)) throw new Error('Unexpected prepared wallet.');
   return wallet;
 }
-
+function isRecordingAccess(value: unknown) {
+  if (typeof value !== 'string' || !/^[\da-f]{64}$/.test(value)) return false;
+  const expected = createHmac('sha256', signer().privateKey).update('city-money-recording-v1').digest();
+  return timingSafeEqual(Buffer.from(value, 'hex'), expected);
+}
+async function paymentLimit() {
+  const access = (await cookies()).get('cm-recording')?.value;
+  return isRecordingAccess(access) ? maxLivePayments : maxPublicPayments;
+}
+async function firstLiveNonce() {
+  const [last, receipt] = await Promise.all([provider.getTransaction(proof.transactions.rejection.hash), provider.getTransactionReceipt(proof.transactions.rejection.hash)]);
+  if (!last || !receipt || receipt.status !== 0 || getAddress(last.from) !== getAddress(policy.participant) || !last.to || getAddress(last.to) !== getAddress(policy.token)) throw new Error('Starting nonce cannot be established.');
+  return last.nonce + 1;
+}
 async function checkoutSnapshot(): Promise<{ wallet: Wallet; balances: CheckoutSnapshot }> {
   const wallet = signer();
-  if (!wallet) throw new Error('Prepared test checkout is not configured');
-  const last = await provider.getTransaction(proof.transactions.rejection.hash);
-  const receipt = await provider.getTransactionReceipt(proof.transactions.rejection.hash);
-  if (!last || !receipt || receipt.status !== 0 || getAddress(last.from) !== getAddress(wallet.address) || getAddress(last.to!) !== getAddress(fixture.cva)) throw new Error('Cannot establish the last approved test-wallet nonce');
-  const firstLiveNonce = last.nonce + 1;
-  const [chain, symbol, participantBalance, merchantBalance, nativeBalance, latestNonce, pendingNonce] = await Promise.all([
-    provider.send('eth_chainId', []), token.symbol(), token.balanceOf(wallet.address),
-    token.balanceOf(fixture.roles.merchant.address), provider.getBalance(wallet.address),
-    provider.getTransactionCount(wallet.address, 'latest'), provider.getTransactionCount(wallet.address, 'pending'),
+  const [first, chain, symbol, decimals, participantBalance, merchantBalance, nativeBalance, latestNonce, pendingNonce] = await Promise.all([
+    firstLiveNonce(), provider.send('eth_chainId', []), token.symbol(), token.decimals(), token.balanceOf(wallet.address), token.balanceOf(policy.merchant), provider.getBalance(wallet.address), provider.getTransactionCount(wallet.address, 'latest'), provider.getTransactionCount(wallet.address, 'pending'),
   ]);
-  if (Number(chain) !== fixture.chainId || symbol !== fixture.symbol) throw new Error('Wrong sandbox network or token');
-  return { wallet, balances: { participantBalance, merchantBalance, nativeBalance, latestNonce, pendingNonce, firstLiveNonce, merchantCap: maxMerchantBalance } };
+  if (Number(chain) !== fixture.chainId || symbol !== fixture.symbol || Number(decimals) !== fixture.decimals) throw new Error('Unexpected network or asset.');
+  return { wallet, balances: { participantBalance, merchantBalance, nativeBalance, latestNonce, pendingNonce, firstLiveNonce: first, merchantCap: maxMerchantBalance } };
 }
-
-async function receiptResponse(hash: string) {
+async function receiptResponse(hash: string, nonce?: number) {
   if (!/^0x[\da-f]{64}$/i.test(hash)) return json({ error: 'Valid transaction hash required.' }, 400);
+  const base = { hash, explorer: `https://testnet.monadscan.com/tx/${hash}` };
   const [transaction, receipt] = await Promise.all([provider.getTransaction(hash), provider.getTransactionReceipt(hash)]);
-  if (!transaction) return json({ status: 'unknown', hash, explorer: `https://testnet.monadscan.com/tx/${hash}`, message: 'Transaction could not be located yet.' }, 202);
-  const call = token.interface.parseTransaction({ data: transaction.data });
-  if (getAddress(transaction.from) !== getAddress(fixture.roles.participant.address) || !transaction.to || getAddress(transaction.to) !== getAddress(fixture.cva) || transaction.chainId !== BigInt(fixture.chainId) || call?.name !== 'transfer' || getAddress(call.args[0]) !== getAddress(fixture.roles.merchant.address) || call.args[1] < paymentAmount('1')! || call.args[1] > paymentAmount('5')!) return json({ error: 'This is not a bounded prepared-wallet payment to Corner Table.' }, 400);
-  if (!receipt) return json({ status: 'pending', hash, explorer: `https://testnet.monadscan.com/tx/${hash}`, message: 'The actual transaction is still awaiting confirmation.' }, 202);
-  if (receipt.status !== 1) return json({ status: 'reverted', hash, explorer: `https://testnet.monadscan.com/tx/${hash}`, block: receipt.blockNumber, message: 'The actual token transfer reverted. No payment is claimed.' }, 422);
-  const moved = receipt.logs.some(log => {
-    if (getAddress(log.address) !== getAddress(fixture.cva)) return false;
-    try {
-      const event = token.interface.parseLog({ topics: [...log.topics], data: log.data });
-      return event?.name === 'Transfer' && getAddress(event.args[0]) === getAddress(fixture.roles.participant.address) && getAddress(event.args[1]) === getAddress(fixture.roles.merchant.address) && event.args[2] === call.args[1];
-    } catch { return false; }
-  });
-  if (!moved) return json({ status: 'unconfirmed', hash, explorer: `https://testnet.monadscan.com/tx/${hash}`, message: 'A successful receipt exists, but the matching transfer event could not be verified.' }, 202);
-  return json({ status: 'confirmed', hash, explorer: `https://testnet.monadscan.com/tx/${hash}`, amount: formatUnits(call.args[1], fixture.decimals), block: receipt.blockNumber, message: 'Actual payment receipt and token Transfer event verified.' });
+  if (!transaction) {
+    if (nonce !== undefined && await provider.getTransactionCount(policy.participant, 'latest') > nonce) return json({ ...base, status: 'superseded', message: 'Another transaction used this shared-wallet nonce. This payment is not confirmed; no credits are claimed for it.' });
+    return json({ ...base, status: 'unknown', message: 'This hash is not confirmed yet. Recheck, or resend only this exact signed payment—not a new payment.' }, 202);
+  }
+  const call = paymentInterface.parseTransaction({ data: transaction.data });
+  if (getAddress(transaction.from) !== getAddress(policy.participant) || !transaction.to || getAddress(transaction.to) !== getAddress(policy.token) || transaction.chainId !== BigInt(fixture.chainId) || call?.name !== 'transfer' || getAddress(call.args[0]) !== getAddress(policy.merchant) || call.args[1] < paymentAmount('1')! || call.args[1] > paymentAmount('5')! || call.args[1] % paymentAmount('1')! !== 0n) return json({ error: 'This is not a bounded Corner Table payment.' }, 400);
+  if (!receipt) return json({ ...base, status: 'pending', message: 'This exact payment is awaiting confirmation.' }, 202);
+  if (receipt.status !== 1) return json({ ...base, status: 'reverted', block: receipt.blockNumber, message: 'The actual transfer reverted. No payment is claimed.' }, 422);
+  if (!receipt.logs.some(log => transferMatches(log, policy, call.args[1]))) return json({ ...base, status: 'unconfirmed', message: 'Receipt succeeded but the exact token Transfer event could not be verified.' }, 202);
+  return json({ ...base, status: 'confirmed', amount: formatUnits(call.args[1], fixture.decimals), block: receipt.blockNumber, message: 'Receipt and exact Cleanverse CVA Transfer event verified.' });
 }
-
 export async function GET(request: Request) {
-  const receiptHash = new URL(request.url).searchParams.get('receipt');
-  if (receiptHash) {
-    try { return await receiptResponse(receiptHash); }
-    catch { return json({ error: 'Receipt verification is currently unavailable. No payment outcome is assumed.' }, 503); }
+  const url = new URL(request.url);
+  const hash = url.searchParams.get('receipt');
+  if (hash) {
+    const value = url.searchParams.get('nonce');
+    const nonce = value !== null && /^\d{1,6}$/.test(value) ? Number(value) : undefined;
+    try { return await receiptResponse(hash, nonce); }
+    catch { return json({ error: 'Receipt verification is unavailable. No outcome is assumed.' }, 503); }
   }
-  if (!process.env.CITY_MONEY_TEST_PARTICIPANT_PRIVATE_KEY) return json({ available: false, reason: 'Live checkout is not configured.', remaining: 0, minimum: 1, maximum: maxPaymentCredits });
+  if (!process.env.CITY_MONEY_TEST_PARTICIPANT_PRIVATE_KEY) return json({ available: false, reason: 'Checkout is not configured.', remaining: 0 });
   try {
-    const { balances } = await checkoutSnapshot();
-    return json({ ...checkoutAvailability(balances), minimum: 1, maximum: maxPaymentCredits, merchant: fixture.roles.merchant.address, signing: 'Prepared test wallet, server-side; no user wallet or issuer key.' });
-  } catch {
-    return json({ available: false, reason: 'Checkout status could not be confirmed; inspect the recorded receipts instead.', remaining: 0 }, 503);
-  }
+    const [{ balances }, limit] = await Promise.all([checkoutSnapshot(), paymentLimit()]);
+    return json({ ...checkoutAvailability(balances, paymentAmount('1')!, limit), minimum: 1, maximum: maxPaymentCredits, merchant: policy.merchant, recording: limit === maxLivePayments, signing: 'Prepared participant wallet; server-side signing, fixed merchant only.' });
+  } catch { return json({ available: false, reason: 'Checkout status cannot be confirmed. Existing receipts remain available.', remaining: 0 }, 503); }
 }
-
 export async function POST(request: Request) {
-  if (request.headers.get('origin') !== new URL(request.url).origin) return json({ error: 'Use the City Money sandbox to authorize this test action.' }, 403);
-  if (!request.headers.get('content-type')?.startsWith('application/json')) return json({ error: 'JSON amount required.' }, 415);
-  let amount: bigint | null;
+  if (request.headers.get('origin') !== new URL(request.url).origin) return json({ error: 'Use the City Money workspace for this action.' }, 403);
+  if (!request.headers.get('content-type')?.startsWith('application/json')) return json({ error: 'JSON input required.' }, 415);
+  let body: Record<string, unknown>;
   try {
-    const body = await request.text();
-    if (body.length > 80) return json({ error: 'Test payment input is too long.' }, 413);
-    const parsed: unknown = JSON.parse(body);
-    if (typeof parsed !== 'object' || !parsed || Array.isArray(parsed) || Object.keys(parsed).length !== 1) return json({ error: 'Only a test-credit amount is accepted.' }, 400);
-    amount = paymentAmount((parsed as { amount?: unknown }).amount, fixture.decimals);
-  } catch {
-    return json({ error: 'Invalid test payment input.' }, 400);
+    const text = await request.text();
+    if (text.length > 2500) return json({ error: 'Payment input is too long.' }, 413);
+    const parsed: unknown = JSON.parse(text);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) || Object.keys(parsed).length !== 2) return json({ error: 'Only the documented payment fields are accepted.' }, 400);
+    body = parsed as Record<string, unknown>;
+  } catch { return json({ error: 'Invalid payment input.' }, 400); }
+  if (body.action === 'recording' && Object.hasOwn(body, 'access')) {
+    try {
+      if (!isRecordingAccess(body.access)) return json({ error: 'Recording access could not be verified.' }, 403);
+      (await cookies()).set('cm-recording', String(body.access), { httpOnly: true, secure: true, sameSite: 'strict', path: '/', maxAge: 10800 });
+      return json({ recording: true });
+    } catch { return json({ error: 'Recording access is unavailable.' }, 503); }
   }
-  if (amount === null) return json({ error: 'Choose a whole amount from 1 to 5 test credits.' }, 400);
-  if (paymentInFlight) return json({ error: 'A test checkout is already being submitted. Refresh before trying again.' }, 409);
-  paymentInFlight = true;
-  let hash: string | undefined;
+  if (body.action !== 'prepare' && body.action !== 'broadcast') return json({ error: 'Choose a valid payment action.' }, 400);
+  if (body.action === 'prepare') {
+    const amount = paymentAmount(body.amount, fixture.decimals);
+    if (amount === null || !Object.hasOwn(body, 'amount')) return json({ error: 'Choose a whole amount from 1 to 5 credits.' }, 400);
+    try {
+      const [{ wallet, balances }, limit] = await Promise.all([checkoutSnapshot(), paymentLimit()]);
+      const available = checkoutAvailability(balances, amount, limit);
+      if (!available.available) return json({ error: available.reason, remaining: available.remaining }, 409);
+      const safeToken = token.connect(wallet) as Contract;
+      if (await safeToken.transfer.staticCall(policy.merchant, amount) !== true) return json({ error: 'The CVA did not authorize this merchant.' }, 409);
+      const estimate: bigint = await safeToken.transfer.estimateGas(policy.merchant, amount);
+      const gasLimit = (estimate * 10750n + 9999n) / 10000n;
+      const fee = await provider.getFeeData();
+      if (gasLimit > 300000n || fee.maxFeePerGas == null || fee.maxPriorityFeePerGas == null || gasLimit * fee.maxFeePerGas > parseEther('0.06') || balances.nativeBalance < gasLimit * fee.maxFeePerGas) return json({ error: 'The approved fee ceiling cannot be established.' }, 503);
+      const transaction = await wallet.signTransaction({ type: 2, to: policy.token, data: paymentInterface.encodeFunctionData('transfer', [policy.merchant, amount]), nonce: balances.latestNonce, chainId: fixture.chainId, gasLimit, maxFeePerGas: fee.maxFeePerGas, maxPriorityFeePerGas: fee.maxPriorityFeePerGas });
+      const intent = signedPayment(transaction, { ...policy, firstNonce: balances.firstLiveNonce, limit });
+      return json({ status: 'prepared', transaction, hash: intent.hash, nonce: intent.tx.nonce, amount: formatUnits(amount, fixture.decimals), explorer: `https://testnet.monadscan.com/tx/${intent.hash}`, message: 'Signed, not broadcast. Save this exact payment before submitting.' });
+    } catch { return json({ error: 'A bounded payment could not be prepared. No broadcast was attempted.' }, 503); }
+  }
+  if (!Object.hasOwn(body, 'transaction')) return json({ error: 'The exact signed transaction is required.' }, 400);
+  let intent;
+  try { intent = signedPayment(body.transaction, { ...policy, firstNonce: await firstLiveNonce(), limit: await paymentLimit() }); }
+  catch { return json({ error: 'This signed transaction is not an approved bounded payment.' }, 400); }
+  const base = { hash: intent.hash, explorer: `https://testnet.monadscan.com/tx/${intent.hash}` };
   try {
-    const { wallet, balances } = await checkoutSnapshot();
-    const permission = checkoutAvailability(balances, amount);
-    if (!permission.available) return json({ error: permission.reason, remaining: permission.remaining }, 409);
-    const safeToken = token.connect(wallet) as Contract;
-    const allowed = await safeToken.transfer.staticCall(fixture.roles.merchant.address, amount);
-    if (allowed !== true) return json({ error: 'The actual CVA did not authorize this merchant transfer. Nothing was submitted.' }, 409);
-    const estimate: bigint = await safeToken.transfer.estimateGas(fixture.roles.merchant.address, amount);
-    const gasLimit = (estimate * 10750n + 9999n) / 10000n;
-    const fee = await provider.getFeeData();
-    if (gasLimit > 300000n || fee.maxFeePerGas == null || fee.maxPriorityFeePerGas == null || gasLimit * fee.maxFeePerGas > parseEther('0.06') || balances.nativeBalance < gasLimit * fee.maxFeePerGas) return json({ error: 'Safe testnet gas limits cannot be confirmed. No payment was sent.' }, 503);
-    const tx = await wallet.sendTransaction({
-      to: fixture.cva,
-      data: token.interface.encodeFunctionData('transfer', [fixture.roles.merchant.address, amount]),
-      nonce: balances.latestNonce,
-      chainId: fixture.chainId,
-      gasLimit,
-      maxFeePerGas: fee.maxFeePerGas,
-      maxPriorityFeePerGas: fee.maxPriorityFeePerGas,
-    });
-    hash = tx.hash;
-    const receipt = await provider.waitForTransaction(hash, 1, 35000);
-    if (!receipt) return json({ status: 'pending', hash, explorer: `https://testnet.monadscan.com/tx/${hash}`, message: 'Transaction submitted but not yet confirmed. Inspect the explorer before trying again.' }, 202);
-    if (receipt.status !== 1) return json({ status: 'reverted', hash, explorer: `https://testnet.monadscan.com/tx/${hash}`, message: 'The actual token transfer reverted. No payment is claimed.' }, 422);
-    const [participantAfter, merchantAfter] = await Promise.all([
-      token.balanceOf(wallet.address, { blockTag: receipt.blockNumber }),
-      token.balanceOf(fixture.roles.merchant.address, { blockTag: receipt.blockNumber }),
-    ]);
-    if (participantAfter !== balances.participantBalance - amount || merchantAfter !== balances.merchantBalance + amount) return json({ status: 'unconfirmed', hash, explorer: `https://testnet.monadscan.com/tx/${hash}`, message: 'Receipt succeeded, but exact balance changes could not be reconciled. Inspect the explorer.' }, 202);
-    return json({ status: 'confirmed', hash, explorer: `https://testnet.monadscan.com/tx/${hash}`, block: receipt.blockNumber, amount: formatUnits(amount, fixture.decimals), balances: { participant: formatUnits(participantAfter, fixture.decimals), merchant: formatUnits(merchantAfter, fixture.decimals) }, message: 'Actual Cleanverse CVA payment confirmed on Monad testnet.' });
-  } catch {
-    if (hash) return json({ status: 'unknown', hash, explorer: `https://testnet.monadscan.com/tx/${hash}`, message: 'The transaction was submitted, but confirmation is unavailable. Inspect the explorer before retrying.' }, 202);
-    return json({ error: 'Payment could not be verified or submitted. Refresh both balance and checkout status before trying again.' }, 503);
-  } finally {
-    paymentInFlight = false;
-  }
+    if (await provider.getTransaction(intent.hash)) return await receiptResponse(intent.hash, intent.tx.nonce);
+    const { balances } = await checkoutSnapshot();
+    if (balances.latestNonce > intent.tx.nonce) return await receiptResponse(intent.hash, intent.tx.nonce);
+    if (balances.latestNonce !== intent.tx.nonce) return json({ error: 'This is not the current shared-wallet nonce.' }, 409);
+    if (balances.pendingNonce !== balances.latestNonce) return json({ ...base, status: 'unknown', message: 'This nonce is occupied by a pending transaction. Recheck the saved hash; no new payment was signed.' }, 202);
+    const permission = checkoutAvailability(balances, intent.amount, await paymentLimit());
+    if (!permission.available) return json({ error: permission.reason }, 409);
+    if (await token.transfer.staticCall(policy.merchant, intent.amount, { from: policy.participant }) !== true) return json({ error: 'The CVA no longer authorizes this merchant transfer.' }, 409);
+    // Retries broadcast identical signed bytes; Monad executes their nonce only once.
+    const transaction = await provider.broadcastTransaction(String(body.transaction));
+    if (transaction.hash !== intent.hash) throw new Error('Unexpected broadcast hash.');
+    await provider.waitForTransaction(intent.hash, 1, 30000);
+    return await receiptResponse(intent.hash, intent.tx.nonce);
+  } catch { return json({ ...base, status: 'unknown', message: 'Broadcast outcome is not confirmed. The exact payment is saved; recheck this hash before doing anything else.' }, 202); }
 }

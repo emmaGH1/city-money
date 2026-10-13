@@ -1,5 +1,19 @@
 # City Money — continuation checkpoint
 
+## Active finish pass — 13 October, 21:10 UTC
+
+Emma approved the expanded finish scope after reviewing `/home/ubuntu/city-money-finish-proposal.md` in this originating session: repeatable capped judge payments, actual shadcn/ui refinement, prominent Cleanverse CVI→CVA→Monad mechanism, merchant receipt, and a genuine founder-led 2:40 film. Keep A+B; $0, testnet, no issuer secret on Vercel, no merge/submission. Her latest instruction requires a visible normal cursor, genuine real browser interactions, natural deliberate pointing and pauses, and founder energy; not a simulated UI or hidden-cursor automated-looking capture.
+
+No narration may be generated until the founder script and a credit ceiling are approved. A read-only ElevenLabs access check succeeded using the existing personal `ELEVENLABS_API_KEY`. The clone is named `my voice`, ID `0ooxr7N7JJjIsVylsgeF`. Starter account was active with 28,235 included credits left and overage disabled. No new key, voice cloning, credit purchase or audio generation occurred.
+
+Local work in progress, not deployed/funded/committed: `lib/demo-limits.ts` now permits 24 live nonces (22 public, final 2 reserved for recording), starting from the historical rejection nonce+1 (2). `lib/payment-intent.ts` validates signed fixed-merchant, 1–5 whole credits, chain10143, type2, value0, bounded nonce, gas<=300k and maximum fee<=0.06 MON. Checkout route now prepares signed bytes/hash first, then broadcasts identical bytes on retry; chain nonce gives cross-instance execution exclusivity without a new database. Exact receipt and Transfer-event validation are used on immediate and later confirmation. Recording access is a server HMAC derived from the participant test key; POST action `recording` sets an HttpOnly Secure Strict cookie for the reserved slots. The credential must never be printed or committed.
+
+Workspace intent recovery is partially implemented: localStorage retains the exact signed bytes/hash before broadcast, reload checks that same hash, and superseded nonces are a separate terminal state. Still add/review the explicit resend-same-transaction recovery control, update stale two-payment copy, and refine the UI. Production remains the previous verified build with one remaining shared checkout. Do not call the new behavior browser-verified.
+
+Next work: finish intent tests and client recovery, then install actual shadcn/ui/Tailwind and refine navigation/checkout/mobile/merchant/boundary/landing. Privately fund the computed capped allowance (proposed +105 CITYCM and native gas up to 1.44 MON) only after reviewing script safety and current balances; preserve historical 20-credit allocation as history, add separate allowance funding receipts. Admin currently has about4.7 test MON; no real-money funding. No funding was performed yet. Run checks, push a coherent checkpoint, deploy and authorize exact UI-test payment amounts/count to the testing agent. It owns all browser setup. For final film, obtain script/credit approval; use local Remotion plus selected Remocn motion scenes, not two toolchains. Keep most footage actual production UI and the current read-only boundary distinct from historical mined rejection. User explicitly approved UI testing/recording in initial unattended authorization.
+
+Deadline verified again from https://hackathon.monad.xyz/api/v1/policies/current: 14 October 03:59 UTC. Target product freeze00:30, finished film02:30, submission package03:10, protected upload/approval buffer. Do not submit without permission. Root blueprint was read; update its obsolete two-payment knowledge after the new behavior is verified. No new processes/dev servers were started by the lead for UI testing.
+
 Approved 2026-10-13 by Emma in https://app.devin.ai/sessions/5c64da2265ea4acb82bac690e99d67e2.
 
 ## Authorization

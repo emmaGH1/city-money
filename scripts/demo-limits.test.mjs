@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseEther, parseUnits } from 'ethers';
-import { checkoutAvailability, maxLivePayments, merchantCap, paymentAmount } from '../lib/demo-limits.ts';
+import { checkoutAvailability, maxLivePayments, maxPublicPayments, merchantCap, paymentAmount } from '../lib/demo-limits.ts';
 
-const state = { participantBalance: parseUnits('15', 6), merchantBalance: parseUnits('5', 6), nativeBalance: parseEther('0.18'), latestNonce: 2, pendingNonce: 2, firstLiveNonce: 2, merchantCap: merchantCap('5.0', 6) };
+const state = { participantBalance: parseUnits('119', 6), merchantBalance: parseUnits('6', 6), nativeBalance: parseEther('1.44'), latestNonce: 3, pendingNonce: 3, firstLiveNonce: 2, merchantCap: merchantCap('5.0', 6) };
 
 test('only accepts one to five whole test credits', () => {
   assert.equal(paymentAmount('1'), 1000000n);
@@ -12,13 +12,16 @@ test('only accepts one to five whole test credits', () => {
 });
 
 test('limits checkout count, participant reserve, merchant balance and native gas', () => {
-  assert.equal(maxLivePayments, 2);
-  assert.equal(merchantCap('5.0', 6), parseUnits('15', 6));
-  assert.deepEqual(checkoutAvailability(state, paymentAmount('5')), { available: true, remaining: 2, reason: '' });
-  assert.equal(checkoutAvailability({ ...state, latestNonce: 4, pendingNonce: 4 }).available, false);
-  assert.equal(checkoutAvailability({ ...state, pendingNonce: 3 }).available, false);
+  assert.equal(maxLivePayments, 24);
+  assert.equal(maxPublicPayments, 22);
+  assert.equal(merchantCap('5.0', 6), parseUnits('125', 6));
+  assert.deepEqual(checkoutAvailability(state, paymentAmount('5')), { available: true, remaining: 21, reason: '' });
+  assert.equal(checkoutAvailability({ ...state, latestNonce: 24, pendingNonce: 24 }).available, false);
+  assert.equal(checkoutAvailability({ ...state, latestNonce: 24, pendingNonce: 24 }, paymentAmount('1'), maxLivePayments).available, true);
+  assert.equal(checkoutAvailability({ ...state, latestNonce: 26, pendingNonce: 26 }, paymentAmount('1'), maxLivePayments).available, false);
+  assert.equal(checkoutAvailability({ ...state, pendingNonce: 4 }).available, false);
   assert.equal(checkoutAvailability({ ...state, participantBalance: parseUnits('1', 6) }).available, false);
-  assert.equal(checkoutAvailability({ ...state, merchantBalance: parseUnits('15', 6) }).available, false);
+  assert.equal(checkoutAvailability({ ...state, merchantBalance: parseUnits('125', 6) }).available, false);
   assert.equal(checkoutAvailability({ ...state, nativeBalance: 0n }).available, false);
   assert.equal(checkoutAvailability({ ...state, latestNonce: 1, pendingNonce: 1 }).available, false);
 });
