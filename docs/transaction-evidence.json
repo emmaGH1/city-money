@@ -156,7 +156,7 @@
       "ruleValue": 69,
       "identityLevel": 1,
       "checkedAt": "2026-10-13T19:27:34.361Z",
-      "method": "eth_call — no transaction was broadcast",
+      "method": "eth_call \u2014 no transaction was broadcast",
       "minedWitness": "0xd0e56e57f39f58fd114f894e3bbbb74afa00853d424bc852760480fdd7f66c77"
     },
     "rejectionPreflight": {
@@ -226,5 +226,41 @@
       "maxPaymentFeeMON": "0.06",
       "note": "Separate test-only judge allowance; does not replace or replay the original 20-credit allocation."
     }
+  },
+  "browserValidationRecovery": {
+    "revision": "60e741f",
+    "supply": "125.0",
+    "before": {
+      "participant": "119.0",
+      "merchant": "6.0",
+      "outsider": "0.0",
+      "remaining": 21
+    },
+    "after": {
+      "participant": "117.0",
+      "merchant": "8.0",
+      "outsider": "0.0",
+      "remaining": 19
+    },
+    "normal": {
+      "hash": "0x6363124711ef0bd8a2ffc6c3f645e02fe408caa6b8c88a7891200ca0ed3f2b19",
+      "nonce": 3,
+      "block": 70795587,
+      "credits": "1",
+      "exactTransferCount": 1
+    },
+    "interrupted": {
+      "hash": "0x787fbc4c828a425b1d5782b9fece24ee6890b6a3e0035062972891baa95a4bd2",
+      "nonce": 4,
+      "block": 70795764,
+      "credits": "1",
+      "exactTransferCount": 1,
+      "responseDroppedAfterServerCompletion": true,
+      "resendExactBytesWithoutPrepare": true
+    },
+    "reloadWithoutBroadcast": true,
+    "localStorageFailureBroadcasts": 0,
+    "independentLatestNonce": 5,
+    "note": "Two approved QA payments. Founder payment still unused; no additional QA spending authorized."
   }
 }

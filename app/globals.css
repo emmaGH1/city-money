@@ -125,7 +125,7 @@ button{font:inherit}
 .proof-bottom{display:flex;gap:20px;justify-content:space-between;align-items:start;margin-top:26px;font-size:12px;line-height:1.7}
 .proof-bottom code{overflow-wrap:anywhere;font-size:11px}
 .proof-bottom a{white-space:nowrap;border-bottom:1px solid var(--ink);font-weight:750}
-.limits-section{position:relative;background:#c5694f;color:#fff9ea;padding:125px clamp(30px,8vw,140px);display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.7fr);gap:clamp(40px,8vw,140px);overflow:hidden;min-height:600px;align-items:center}
+.limits-section{position:relative;background:#a6513b;color:#fff9ea;padding:125px clamp(30px,8vw,140px);display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.7fr);gap:clamp(40px,8vw,140px);overflow:hidden;min-height:600px;align-items:center}
 .limits-stamp{position:absolute;top:-47px;right:7%;font-weight:900;font-size:18px;line-height:.9;letter-spacing:-.04em;border:2px solid #f8e8d0;border-radius:50%;width:146px;height:146px;display:grid;place-items:center;text-align:center;transform:rotate(14deg);opacity:.8}
 .limits-copy h2{font-size:clamp(55px,6.5vw,98px)}
 .limits-copy h2 em{font-weight:400;color:#f5d4ad}
@@ -279,7 +279,10 @@ button{font:inherit}
 .mechanism-compact .mechanism-arrow{color:var(--clay);font-size:22px}
 .sandbox-faq{margin-top:26px;color:#fff9ea;max-width:600px}
 .sandbox-faq [data-slot=accordion-item]{border-bottom:1px solid #fff9ea65}
-.sandbox-faq [data-slot=accordion-trigger]{padding:17px 0;font-size:15px;color:#fff9ea;font-weight:650;line-height:1.4}
+.sandbox-faq h3{margin:0}
+.sandbox-faq [data-slot=accordion-trigger]{appearance:none;background:transparent;border:0;border-radius:0;display:flex;align-items:center;justify-content:space-between;width:100%;padding:17px 0;font-size:15px;color:#fff9ea;font-weight:650;line-height:1.4;text-align:left;cursor:pointer}
+.sandbox-faq [data-slot=accordion-trigger]>svg{color:inherit}
+.sandbox-faq [data-slot=accordion-trigger]:focus-visible{outline:3px solid #fff9ea;outline-offset:4px}
 .sandbox-faq [data-slot=accordion-content]{font-size:14px;line-height:1.65;color:#fff9ea}
 .limits-copy>p:last-of-type{font-size:17px;line-height:1.6;max-width:440px}
 .limits-invitation .button-primary{white-space:normal;justify-content:space-between}
