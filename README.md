@@ -1,6 +1,8 @@
 # City Money
 
-A fictional civic-voucher sandbox on Monad testnet, targeting genuine Cleanverse CVI/CVA enforcement. **Not built or issued yet.**
+A fictional civic-voucher sandbox on Monad testnet, using a **genuine issued Cleanverse CVA**. **Application UI and payment journey are not built yet.**
+
+CVA: [`0x78e12fC329564D6E28d79ed81a009c0215d5Ec8D`](https://testnet.monadscan.com/address/0x78e12fC329564D6E28d79ed81a009c0215d5Ec8D). [Successful issuance transaction](https://testnet.monadscan.com/tx/0xea8ee6b36e7a4abfd17dd0b6e55a4f1e7e9ab6f21c65f2c7c0160485f8dc8d23). Three synthetic sandbox identities are registered; minting and transfer enforcement remain unproven.
 
 Planned journey: receive test credits → pay an approved demo merchant → demonstrate an actually rejected ineligible transfer. No real government, money, residency verification or automatic token-expiry claims.
 

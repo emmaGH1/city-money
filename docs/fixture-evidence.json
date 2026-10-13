@@ -1,0 +1,76 @@
+{
+  "chainId": 10143,
+  "rpcUrl": "https://testnet-rpc.monad.xyz",
+  "cva": "0x78e12fC329564D6E28d79ed81a009c0215d5Ec8D",
+  "cvi": "0xbA82D189540CaC9DC6FF46B6837CaC1BFdEC58B9",
+  "symbol": "CITYCM",
+  "decimals": 6,
+  "programMinimumSubTier": 69,
+  "issuanceTx": "0xea8ee6b36e7a4abfd17dd0b6e55a4f1e7e9ab6f21c65f2c7c0160485f8dc8d23",
+  "roles": {
+    "participant": {
+      "address": "0x0a84Ee5fed17248bdb0998A5ff186830db19c4e9",
+      "cvi": {
+        "subTier": 70,
+        "tier": "20",
+        "expirationTime": 1794504121,
+        "subGroup": "",
+        "cvRecordId": "2504",
+        "countries": [],
+        "currentKycHash": "0xf2b8cc1af48a13dd3136e3d05b34bef994f4d65ac0a5d8fe36f634ca493f9441",
+        "group": "b",
+        "status": 1
+      },
+      "registrationTx": "0x355eae69394e6df389b252aa8dba15cad54d4e4abf93c816c493b2ab451a5154"
+    },
+    "merchant": {
+      "address": "0x392Cb28F06BED7096783cCbD49aBFa2B50646838",
+      "cvi": {
+        "subTier": 70,
+        "tier": "20",
+        "expirationTime": 1794504222,
+        "subGroup": "",
+        "cvRecordId": "2505",
+        "countries": [],
+        "currentKycHash": "0x0fbbd82b9b89d0d08c83d919ed476a0101013aee8899c1707e106acc117d5e98",
+        "group": "b",
+        "status": 1
+      },
+      "registrationTx": "0xe78f7eb1348988d180b990d5c80b573e8e7260cb0385a42c9d8edf1343c7e090"
+    },
+    "outsider": {
+      "address": "0x10883008a0810467F1130F4F27c1A19e3EbFA240",
+      "cvi": {
+        "subTier": 1,
+        "tier": "20",
+        "expirationTime": 1794504224,
+        "subGroup": "",
+        "cvRecordId": "2506",
+        "countries": [],
+        "currentKycHash": "0x10b739e5ee368ca849212142130337a4e14bec0c0d92a88a977428575e455005",
+        "group": "b",
+        "status": 1
+      },
+      "registrationTx": "0x28e0bae1c11f9731fbd606266f0e5c571abc298c16d06afa01a173bb15b75347"
+    }
+  },
+  "rule": {
+    "http": 200,
+    "code": "0000",
+    "message": "success",
+    "data": {
+      "chain": "monad",
+      "rules": [
+        {
+          "allowed_group": "",
+          "allowed_sub_group": "",
+          "min_tier": 0,
+          "min_sub_tier": 69,
+          "is_black_list": false,
+          "countries": []
+        }
+      ],
+      "atoken_address": "0x78e12fc329564d6e28d79ed81a009c0215d5ec8d"
+    }
+  }
+}

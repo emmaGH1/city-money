@@ -13,11 +13,15 @@ One fictional opt-in civic-voucher program: receive test credits, pay an approve
 ## Current state
 
 - Empty public repo cloned; feature branch `devin/1791912000-city-money`.
-- Read-only Cleanverse `list_my_atokens` succeeded and returned previously issued Monad assets. This does not prove a new City Money issuance.
+- Genuine City Money CVA issued on Monad testnet: `0x78e12fC329564D6E28d79ed81a009c0215d5Ec8D`, symbol `CITYCM`, 6 decimals. Application `IA20261014011950500304` reached `ISSUED`; receipt success and admin ownership were confirmed over chain 10143 RPC. Issuance transaction: `0xea8ee6b36e7a4abfd17dd0b6e55a4f1e7e9ab6f21c65f2c7c0160485f8dc8d23`.
 - Sponsor API helper and encrypted local test-wallet vault implemented; no application UI exists yet.
 - New wallets are stored encrypted outside Git at `~/.city-money/wallets.enc`, derived from the replacement sandbox encryption secret. Never commit or print private keys.
 - Vercel browser still redirects to login despite Emma's report of login completion. Hosting session needs confirmation; do not declare deployment ready.
-- No City Money issuance, CVI generation, minting or transfer is established at this checkpoint.
+- Three synthetic sandbox CVIs registered without real identity documents/bank data. Participant and merchant have issuer-assigned subTier 70; outsider has subTier 1. All have active CVIs and sandbox-assigned tier 20. Do not represent these as real KYC or residency.
+- Requested subgroup `CM` was not allocated to this institution. That registration failed, then the supported subTier criterion succeeded. The unavailable subgroup rule was removed and the sole final CVA rule is `min_sub_tier: 69`. Program approval in this sandbox means a valid CVI satisfying this level threshold, not a unique institution/city allowlist. Another qualifying identity can satisfy it; production cohort isolation needs separately approved issuer permissions/policy design.
+- Query Rules advertises encryption but its documented plaintext cURL works; encrypted read returns `10002 Missing required parameter: chain`. Launch, Generate CVI and Add/Remove Rule genuinely accept documented encryption. Do not conclude the encryption key is invalid; launch succeeded with it.
+- Public fixture evidence is in `docs/fixture-evidence.json`; it contains only synthetic identities' public state and actual registration hashes. No mint or payment/rejection has been established yet.
+- Admin holds DEFAULT_ADMIN_ROLE, not yet MINTER_ROLE. All four test wallets have 0 native MON. The official Monad faucet's verification failed; try the documented free QuickNode faucet once. Do not bypass verification, spend real funds or claim success without balances/receipts.
 
 ## Setup and secrets
 
@@ -26,4 +30,9 @@ Provision `CLEANVERSE_SANDBOX_API_ID_NEW` and `CLEANVERSE_SANDBOX_API_KEY_NEW` s
 
 ## Next action
 
-Run exactly one documented encrypted `/atoken/launch` request. Treat submission as pending, not success; only terminal `ISSUED` counts. If the API path fails, inspect the documented Member-platform flow as the materially different second approach. Do not duplicate applications blindly. First feasibility window is approximately 45 minutes from 17:15 UTC. Feature freeze 00:30 UTC; deadline 03:59 UTC on October 14. Human performs final submission.
+Do not issue another token: the one authorized CVA is already genuinely issued. Obtain free native test gas for admin, grant MINTER_ROLE, mint only to the approved participant/merchant, prove permitted payment and actual lower-level-CVI rejection. Complete prototype gate before broad UI. First feasibility window is approximately 45 minutes from 17:15 UTC. Feature freeze 00:30 UTC; deadline 03:59 UTC on October 14. Human performs final submission.
+
+## Portable checkpoints
+
+- First pushed checkpoint: `e61bb6cdfbcc14cb291f5532a19e287410b47d34` (secure probe, authorization, MIT license and icon). Current handoff updates describe the subsequent evidence; consult branch HEAD for the latest code commit.
+- Probe tests: 3/3 pass; Node syntax check passes; npm audit reports zero vulnerabilities after selecting ethers 6.17.0 (the earlier 6.15.0 pinned ws version had advisories and was replaced before push).
