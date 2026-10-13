@@ -67,11 +67,31 @@
       "blockNumber": 70750037,
       "gasUsed": "300000",
       "confirmedAt": "2026-10-13T18:20:11.371Z"
+    },
+    "judgeAllowanceMint": {
+      "hash": "0x813869ebd1ea9f32e210e4e43b4e16ae104b1a5a1c783239d77357fb86f9e831",
+      "amount": "105.0",
+      "to": "0x0a84Ee5fed17248bdb0998A5ff186830db19c4e9",
+      "submittedAt": "2026-10-13T21:24:22.942Z",
+      "status": 1,
+      "blockNumber": 70787178,
+      "gasUsed": "300000",
+      "confirmedAt": "2026-10-13T21:24:27.238Z"
+    },
+    "judgeAllowanceGas": {
+      "hash": "0xe448b2551f7d45ef1f545ce35d4f6b1de8e1848533b4aff1690f2bd7699d287f",
+      "amountMON": "1.278095258",
+      "to": "0x0a84Ee5fed17248bdb0998A5ff186830db19c4e9",
+      "submittedAt": "2026-10-13T21:24:27.711Z",
+      "status": 1,
+      "blockNumber": 70787194,
+      "gasUsed": "21000",
+      "confirmedAt": "2026-10-13T21:24:32.017Z"
     }
   },
   "observations": {
     "identities": {
-      "checkedAt": "2026-10-13T18:20:10.872Z",
+      "checkedAt": "2026-10-13T21:24:22.448Z",
       "source": "Cleanverse sandbox Query CVI API",
       "roles": {
         "participant": {
@@ -183,6 +203,28 @@
         "identityLevel": 1
       },
       "classification": "The issued CVA called its policy verifier, which queried the outsider CVI and reverted with recipient, configured threshold and observed level; same sender and amount passed merchant preflight."
+    },
+    "judgeAllowanceFunding": {
+      "before": {
+        "supply": "20.0",
+        "participant": "14.0",
+        "merchant": "6.0",
+        "outsider": "0.0"
+      },
+      "after": {
+        "supply": "125.0",
+        "participant": "119.0",
+        "merchant": "6.0",
+        "outsider": "0.0"
+      },
+      "totalSupplyTarget": "125.0",
+      "participantNativeTarget": "1.44",
+      "maxLivePayments": 24,
+      "maxPublicPayments": 22,
+      "recordingOnlyNonces": 2,
+      "maxPaymentCredits": 5,
+      "maxPaymentFeeMON": "0.06",
+      "note": "Separate test-only judge allowance; does not replace or replay the original 20-credit allocation."
     }
   }
 }

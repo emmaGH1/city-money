@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { AbiCoder, Contract, FetchRequest, JsonRpcProvider, Wallet, formatEther, formatUnits, getAddress, parseEther, parseUnits } from 'ethers';
 import { apiRequest, loadOrCreateWallets } from './cleanverse-probe.mjs';
+import { maxLivePayments, maxPublicPayments, maxPaymentCredits } from '../lib/demo-limits.ts';
 
 export const ABI = [
   'function symbol() view returns (string)', 'function decimals() view returns (uint8)',
@@ -32,7 +33,7 @@ export function decodePolicyWords(data) {
 
 async function main() {
   const [command, value = '5'] = process.argv.slice(2);
-  if (!['status', 'prepare', 'pay', 'reject'].includes(command)) throw new Error('Usage: node scripts/cva-actions.mjs status|prepare|pay [credits]|reject');
+  if (!['status', 'prepare', 'fund-demo', 'pay', 'reject'].includes(command)) throw new Error('Usage: node scripts/cva-actions.mjs status|prepare|fund-demo|pay [credits]|reject');
   const fixture = JSON.parse(fs.readFileSync(new URL('../docs/fixture-evidence.json', import.meta.url), 'utf8'));
   const vault = path.join(os.homedir(), '.city-money', 'wallets.enc');
   if (!fs.existsSync(vault)) throw new Error('Restore the existing encrypted wallet vault; do not create new wallets for this CVA');
@@ -106,6 +107,35 @@ async function main() {
     console.log(JSON.stringify({ checkedAt: new Date().toISOString(), balances: await snapshot(), adminMON: formatEther(await provider.getBalance(admin.address)), participantMON: formatEther(await provider.getBalance(participant.address)), adminIsMinter: await token.hasRole(await token.MINTER_ROLE(), admin.address) }, null, 2)); return;
   }
   await identities();
+  if (command === 'fund-demo') {
+    if (maxLivePayments !== 24 || maxPublicPayments !== 22 || maxPaymentCredits !== 5) throw new Error('The approved allowance configuration changed; reapprove funding first');
+    const targetSupply = parseUnits('125', fixture.decimals);
+    const originalSupply = parseUnits('20', fixture.decimals);
+    const nativeTarget = parseEther('1.44');
+    const before = evidence.observations.judgeAllowanceFunding?.before ?? await snapshot();
+    const supply = await token.totalSupply();
+    if (supply !== originalSupply && supply !== targetSupply) throw new Error('Unexpected supply; do not mint an additional allowance');
+    if (supply === originalSupply || evidence.transactions.judgeAllowanceMint) {
+      const amount = targetSupply - originalSupply;
+      await mined('judgeAllowanceMint', async () => {
+        await adminToken.mint.staticCall(participant.address, amount);
+        return adminToken.mint(participant.address, amount, await fees(300000n));
+      }, 1, { amount: '105.0', to: participant.address });
+    } else throw new Error('Target supply exists without this operation receipt; inspect before claiming funding');
+    if (await token.totalSupply() !== targetSupply) throw new Error('Supply did not reach the exact capped target');
+    const currentGas = await provider.getBalance(participant.address);
+    if (currentGas < nativeTarget || evidence.transactions.judgeAllowanceGas) {
+      const amountMON = evidence.transactions.judgeAllowanceGas?.amountMON ?? formatEther(nativeTarget - currentGas);
+      await mined('judgeAllowanceGas', async () => {
+        const amount = parseEther(amountMON);
+        if (amount <= 0n || amount > nativeTarget || await provider.getBalance(admin.address) < amount + parseEther('0.1')) throw new Error('Bounded native allowance cannot be funded');
+        return admin.sendTransaction({ to: participant.address, value: amount, ...await fees(21000n) });
+      }, 1, { amountMON, to: participant.address });
+    }
+    evidence.observations.judgeAllowanceFunding = { before, after: await snapshot(), totalSupplyTarget: '125.0', participantNativeTarget: '1.44', maxLivePayments, maxPublicPayments, recordingOnlyNonces: 2, maxPaymentCredits, maxPaymentFeeMON: '0.06', note: 'Separate test-only judge allowance; does not replace or replay the original 20-credit allocation.' };
+    save();
+    console.log(JSON.stringify({ judgeAllowanceFunding: evidence.observations.judgeAllowanceFunding })); return;
+  }
   if (command === 'prepare') {
     const role = await token.MINTER_ROLE();
     if (!await token.hasRole(role, admin.address)) {

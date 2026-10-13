@@ -5,6 +5,7 @@ import fixture from '../../../docs/fixture-evidence.json';
 import proof from '../../../docs/transaction-evidence.json';
 import { checkoutAvailability, maxLivePayments, maxPublicPayments, maxPaymentCredits, merchantCap, paymentAmount, type CheckoutSnapshot } from '../../../lib/demo-limits';
 import { paymentInterface, signedPayment, transferMatches } from '../../../lib/payment-intent';
+import { broadcastSavedPayment } from '../../../lib/payment-execution';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -118,19 +119,15 @@ export async function POST(request: Request) {
   try { intent = signedPayment(body.transaction, { ...policy, firstNonce: await firstLiveNonce(), limit: await paymentLimit() }); }
   catch { return json({ error: 'This signed transaction is not an approved bounded payment.' }, 400); }
   const base = { hash: intent.hash, explorer: `https://testnet.monadscan.com/tx/${intent.hash}` };
-  try {
-    if (await provider.getTransaction(intent.hash)) return await receiptResponse(intent.hash, intent.tx.nonce);
+  const result = await broadcastSavedPayment(provider, { hash: intent.hash, nonce: intent.tx.nonce, transaction: String(body.transaction), participant: policy.participant }, async () => {
     const { balances } = await checkoutSnapshot();
-    if (balances.latestNonce > intent.tx.nonce) return await receiptResponse(intent.hash, intent.tx.nonce);
-    if (balances.latestNonce !== intent.tx.nonce) return json({ error: 'This is not the current shared-wallet nonce.' }, 409);
-    if (balances.pendingNonce !== balances.latestNonce) return json({ ...base, status: 'unknown', message: 'This nonce is occupied by a pending transaction. Recheck the saved hash; no new payment was signed.' }, 202);
     const permission = checkoutAvailability(balances, intent.amount, await paymentLimit());
-    if (!permission.available) return json({ error: permission.reason }, 409);
-    if (await token.transfer.staticCall(policy.merchant, intent.amount, { from: policy.participant }) !== true) return json({ error: 'The CVA no longer authorizes this merchant transfer.' }, 409);
-    // Retries broadcast identical signed bytes; Monad executes their nonce only once.
-    const transaction = await provider.broadcastTransaction(String(body.transaction));
-    if (transaction.hash !== intent.hash) throw new Error('Unexpected broadcast hash.');
-    await provider.waitForTransaction(intent.hash, 1, 30000);
-    return await receiptResponse(intent.hash, intent.tx.nonce);
-  } catch { return json({ ...base, status: 'unknown', message: 'Broadcast outcome is not confirmed. The exact payment is saved; recheck this hash before doing anything else.' }, 202); }
+    if (!permission.available) return permission.reason;
+    if (await token.transfer.staticCall(policy.merchant, intent.amount, { from: policy.participant }) !== true) return 'The CVA no longer authorizes this merchant transfer.';
+    return null;
+  });
+  if (result.result === 'blocked') return json({ error: result.message }, 409);
+  if (result.result === 'unknown') return json({ ...base, status: 'unknown', message: result.message }, 202);
+  try { return await receiptResponse(intent.hash, intent.tx.nonce); }
+  catch { return json({ ...base, status: 'unknown', message: 'Receipt verification is unavailable. Your exact payment remains saved.' }, 202); }
 }

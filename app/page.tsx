@@ -2,16 +2,17 @@ import Link from 'next/link';
 import { CityScene } from '../components/CityScene';
 import evidence from '../docs/fixture-evidence.json';
 import transactions from '../docs/transaction-evidence.json';
+import { SiteHeader } from '../components/SiteHeader';
+import { Mechanism } from '../components/Mechanism';
+import { SandboxFAQ } from '../components/SandboxFAQ';
+import { Button } from '../components/ui/button';
 
 const explorer = 'https://testnet.monadscan.com/tx/';
 
 export default function Home() {
   return (
     <main>
-      <header className="site-header">
-        <Link href="/" className="wordmark"><span className="logo-mark" aria-hidden="true">⌂</span> CITY MONEY<span className="wordmark-period">.</span></Link>
-        <nav aria-label="Main navigation"><a href="#how-it-works">How it works</a><a href="#proof">Proof</a><Link href="/workspace">Open the sandbox <span aria-hidden="true">↗</span></Link></nav>
-      </header>
+      <SiteHeader />
       <section className="hero" aria-labelledby="hero-title">
         <span className="hero-stamp" aria-hidden="true">GOOD<br />HERE<br />↘</span>
         <div className="hero-voucher" aria-hidden="true">
@@ -22,17 +23,17 @@ export default function Home() {
           <div className="voucher-bottom"><span>FICTIONAL PROGRAM</span><span>MONAD TESTNET</span></div>
         </div>
         <div className="hero-copy">
-          <p className="eyebrow hero-eyebrow">A neighborhood-sized experiment <span aria-hidden="true">✳</span> Monad testnet</p>
+          <p className="eyebrow hero-eyebrow">COMMUNITY BENEFITS <span aria-hidden="true">✳</span> CLEANVERSE ON MONAD</p>
           <h1 id="hero-title">A little goes<br /><em>around here.</em></h1>
-          <p className="hero-description">What if a local benefit stayed local? Explore a fictional test-credit program where a prepared participant can pay an eligible merchant—but our lower-level test identity can’t receive the credits.</p>
-          <Link href="/workspace" className="button-primary">Step into the sandbox <span aria-hidden="true">↗</span></Link>
-          <p className="hero-disclaimer">A fictional test program. No city, real money, or real-world identity check.</p>
+          <p className="hero-description">Community credits that can be spent—not sent anywhere. <strong>Cleanverse</strong> enforces who can receive them. <strong>Monad</strong> records each payment.</p>
+          <Button asChild className="button-primary"><Link href="/workspace">Use your program voucher <span aria-hidden="true">↗</span></Link></Button>
+          <p className="hero-disclaimer">A fictional neighborhood. Real contract-backed transfers.</p>
         </div>
         <div className="hero-city"><CityScene /></div>
         <div className="hero-ground" aria-hidden="true"><span /> <span /> <span /></div>
         <span className="hero-edition" aria-hidden="true">THE NEIGHBORHOOD ISSUE · NO. 01</span>
       </section>
-      <div className="street-ribbon" aria-label="How the sandbox works"><span>ONE TEST VOUCHER</span><span aria-hidden="true">✳</span><span>ONE CORNER SHOP</span><span aria-hidden="true">✳</span><span>ONE REAL BOUNDARY</span></div>
+      <Mechanism />
       <section id="how-it-works" className="journey-section" aria-labelledby="journey-title">
         <div className="journey-intro"><p className="eyebrow">01 / THE SMALL IDEA</p><h2 id="journey-title">Not a new kind<br />of money.<br /><em>A new kind<br />of boundary.</em></h2><p>The token is real. This neighborhood program is imagined. Follow one voucher through three very different moments.</p></div>
         <div className="journey-route" aria-label="The receive, pay, reject journey">
@@ -58,16 +59,17 @@ export default function Home() {
           <a href={`${explorer}${evidence.issuanceTx}`} target="_blank" rel="noopener noreferrer"><span>01</span><span><strong>CITYCM was issued.</strong><small>Cleanverse CVA · Monad testnet · confirmed transaction</small></span><span aria-hidden="true">↗</span></a>
           <a href={`${explorer}${evidence.roles.participant.registrationTx}`} target="_blank" rel="noopener noreferrer"><span>02</span><span><strong>A participant was registered.</strong><small>Synthetic sandbox CVI · confirmed transaction</small></span><span aria-hidden="true">↗</span></a>
           <a href={`${explorer}${evidence.ruleAddedTx}`} target="_blank" rel="noopener noreferrer"><span>03</span><span><strong>The level rule was added.</strong><small>Configured min_sub_tier: 69 · confirmed transaction</small></span><span aria-hidden="true">↗</span></a>
-          <a href={`${explorer}${transactions.transactions.mint.hash}`} target="_blank" rel="noopener noreferrer"><span>04</span><span><strong>20 credits were minted.</strong><small>Prepared participant · receipt status 1</small></span><span aria-hidden="true">↗</span></a>
+          <a href={`${explorer}${transactions.transactions.mint.hash}`} target="_blank" rel="noopener noreferrer"><span>04</span><span><strong>The original 20-credit allocation.</strong><small>Historical mint · prepared participant · receipt status 1</small></span><span aria-hidden="true">↗</span></a>
           <a href={`${explorer}${transactions.transactions.payment.hash}`} target="_blank" rel="noopener noreferrer"><span>05</span><span><strong>5 credits reached Corner Table.</strong><small>Eligible merchant · receipt status 1</small></span><span aria-hidden="true">↗</span></a>
           <a className="proof-declined" href={`${explorer}${transactions.transactions.rejection.hash}`} target="_blank" rel="noopener noreferrer"><span>06</span><span><strong>1 credit could not leave.</strong><small>Outsider level 1 · configured rule 69 · receipt status 0</small></span><span aria-hidden="true">↗</span></a>
+          <a href={`${explorer}${transactions.transactions.judgeAllowanceMint.hash}`} target="_blank" rel="noopener noreferrer"><span>07</span><span><strong>A capped judge allowance was funded.</strong><small>Separate 105-credit test mint · original allocation preserved as history</small></span><span aria-hidden="true">↗</span></a>
         </div>
         <div className="proof-bottom"><span>CVA · <code>{evidence.cva}</code></span><a href={`https://testnet.monadscan.com/address/${evidence.cva}`} target="_blank" rel="noopener noreferrer">Inspect token contract ↗</a></div>
       </section>
       <section id="limits" className="limits-section" aria-labelledby="limits-title">
-        <div className="limits-stamp" aria-hidden="true">TEST<br />ONLY<br />↗</div>
-        <div className="limits-copy"><p className="eyebrow">04 / A QUICK NOTE BEFORE YOU GO</p><h2 id="limits-title">A city-sized idea.<br /><em>Not a city program.</em></h2><p>No government partner. No real residency checks or identity documents. No fiat, cash redemption, or production compliance claim. Just an honest, testnet-sized experiment in keeping a benefit inside an eligible group.</p></div>
-        <div className="limits-invitation"><span>THIS WAY TO THE DEMO</span><p>The voucher, the merchant, the live balance—and the real receipts—live here.</p><Link href="/workspace" className="button-primary">Enter the sandbox <span aria-hidden="true">↗</span></Link><small>Prepared test accounts · Monad testnet · No wallet needed to inspect</small></div>
+        <div className="limits-stamp" aria-hidden="true">COME<br />ON IN<br />↗</div>
+        <div className="limits-copy"><p className="eyebrow">04 / YOUR TURN</p><h2 id="limits-title">Small enough<br /><em>to try.</em></h2><p>Pay Corner Table. Follow the receipt. Check where the credits cannot go.</p><SandboxFAQ /></div>
+        <div className="limits-invitation"><span>THIS WAY TO THE PROGRAM</span><p>A funded voucher.<br />A real payment.<br />An inspectable rule.</p><Button asChild className="button-primary"><Link href="/workspace">Enter the workspace <span aria-hidden="true">↗</span></Link></Button><small>Shared prepared wallet · bounded allowance · no wallet setup</small></div>
       </section>
       <footer className="site-footer"><span>CITY MONEY / FICTIONAL SANDBOX</span><div><a href="https://github.com/emmaGH1/city-money" target="_blank" rel="noopener noreferrer">SOURCE &amp; LICENSE ↗</a><a href={`https://testnet.monadscan.com/address/${evidence.cva}`} target="_blank" rel="noopener noreferrer">ISSUED CVA ↗</a></div></footer>
     </main>
