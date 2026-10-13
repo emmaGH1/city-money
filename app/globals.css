@@ -84,6 +84,8 @@ button{font:inherit}
 .proof-ledger{border-top:2px solid var(--ink)}
 .proof-ledger>a,.proof-awaiting{border-bottom:1px solid #b7ad9b;display:grid;grid-template-columns:65px minmax(0,1fr) 26px;align-items:center;gap:25px;padding:27px 12px}
 .proof-ledger>a:hover{background:#e6dbc8}
+.proof-ledger>a.proof-declined{background:#e9d8c5}
+.proof-ledger>a.proof-declined:hover{background:#decbb8}
 .proof-ledger>a>span:first-child,.proof-awaiting>span:first-child{font-family:Georgia,serif;font-size:30px;font-style:italic;color:var(--clay)}
 .proof-ledger strong{display:block;font-family:Georgia,serif;font-size:26px;font-weight:500;letter-spacing:-.04em}
 .proof-ledger small{display:block;margin-top:5px;color:#4a5c4d;font-size:12px;line-height:1.4}
@@ -162,6 +164,8 @@ button{font:inherit}
 .receipt-list{border-top:2px solid var(--ink)}
 .receipt-list>a,.receipt-pending{border-bottom:1px solid #bac2b2;display:grid;grid-template-columns:minmax(0,1fr) 25px;grid-template-rows:auto auto auto;gap:5px;padding:22px 11px}
 .receipt-list>a:hover{background:#e7e4d6}
+.receipt-list>a.receipt-declined{background:#ece0d3}
+.receipt-list>a.receipt-declined:hover{background:#e5d4c2}
 .receipt-list span:first-child{font-size:10px;letter-spacing:.12em;font-weight:850;color:var(--clay)}
 .receipt-list strong{font-family:Georgia,serif;letter-spacing:-.035em;font-weight:500;font-size:25px}
 .receipt-list small{font-size:11px;line-height:1.45;color:#536154}

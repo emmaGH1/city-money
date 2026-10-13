@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CityScene } from '../components/CityScene';
 import evidence from '../docs/fixture-evidence.json';
+import transactions from '../docs/transaction-evidence.json';
 
 const explorer = 'https://testnet.monadscan.com/tx/';
 
@@ -35,9 +36,9 @@ export default function Home() {
       <section id="how-it-works" className="journey-section" aria-labelledby="journey-title">
         <div className="journey-intro"><p className="eyebrow">01 / THE SMALL IDEA</p><h2 id="journey-title">Not a new kind<br />of money.<br /><em>A new kind<br />of boundary.</em></h2><p>The token is real. This neighborhood program is imagined. Follow one voucher through three very different moments.</p></div>
         <div className="journey-route" aria-label="The receive, pay, reject journey">
-          <div className="journey-step"><span className="step-number">01</span><div><span className="step-label">RECEIVE</span><h3>A benefit lands.</h3><p>A prepared sandbox participant is registered at level 70. The token exists, but their balance is still zero; allocation awaits test gas.</p></div><span className="step-symbol" aria-hidden="true">↘</span></div>
-          <div className="journey-step"><span className="step-number">02</span><div><span className="step-label">SPEND</span><h3>A table gets paid.</h3><p>Our Corner Table merchant is registered at level 70 too. The permitted preflight succeeds; a funded payment is not yet proven.</p></div><span className="step-symbol" aria-hidden="true">↗</span></div>
-          <div className="journey-step"><span className="step-number">03</span><div><span className="step-label">THE BOUNDARY</span><h3>The wrong door stays closed.</h3><p>The prepared outsider is registered at level 1. Its zero-value transfer preflight reverts at the CVA; a mined rejection remains to be demonstrated.</p></div><span className="step-symbol" aria-hidden="true">×</span></div>
+          <div className="journey-step"><span className="step-number">01</span><div><span className="step-label">RECEIVE</span><h3>A benefit lands.</h3><p>The prepared test participant received 20 CITYCM credits from the genuine issued CVA. The mint has its own Monad receipt.</p></div><span className="step-symbol" aria-hidden="true">↘</span></div>
+          <div className="journey-step"><span className="step-number">02</span><div><span className="step-label">SPEND</span><h3>A table gets paid.</h3><p>They paid 5 credits to Corner Table. Its level-70 merchant identity passed the token policy, and the transfer settled on-chain.</p></div><span className="step-symbol" aria-hidden="true">↗</span></div>
+          <div className="journey-step"><span className="step-number">03</span><div><span className="step-label">THE BOUNDARY</span><h3>The wrong door stays closed.</h3><p>The same participant tried to send 1 credit to a level-1 test outsider. The Cleanverse policy reverted the mined transaction. No credits moved.</p></div><span className="step-symbol" aria-hidden="true">×</span></div>
           <Link href="/workspace" className="journey-link">Follow the voucher in the sandbox <span aria-hidden="true">↗</span></Link>
         </div>
       </section>
@@ -52,19 +53,21 @@ export default function Home() {
         </div>
       </section>
       <section id="proof" className="proof-section" aria-labelledby="proof-title">
-        <div className="proof-header"><p className="eyebrow">03 / UNDER THE POSTER</p><h2 id="proof-title">Don&apos;t take our<br /><em>word for it.</em></h2><p>The issue and identity setup really happened on Monad testnet. Open the receipts. Payment and failed-transfer receipts are still pending.</p></div>
+        <div className="proof-header"><p className="eyebrow">03 / UNDER THE POSTER</p><h2 id="proof-title">Don&apos;t take our<br /><em>word for it.</em></h2><p>Issue, allocation, payment and rejection all happened on Monad testnet. Open the receipts—not a simulated transaction screen.</p></div>
         <div className="proof-ledger" aria-label="Verified on-chain setup">
           <a href={`${explorer}${evidence.issuanceTx}`} target="_blank" rel="noopener noreferrer"><span>01</span><span><strong>CITYCM was issued.</strong><small>Cleanverse CVA · Monad testnet · confirmed transaction</small></span><span aria-hidden="true">↗</span></a>
           <a href={`${explorer}${evidence.roles.participant.registrationTx}`} target="_blank" rel="noopener noreferrer"><span>02</span><span><strong>A participant was registered.</strong><small>Synthetic sandbox CVI · confirmed transaction</small></span><span aria-hidden="true">↗</span></a>
           <a href={`${explorer}${evidence.ruleAddedTx}`} target="_blank" rel="noopener noreferrer"><span>03</span><span><strong>The level rule was added.</strong><small>Configured min_sub_tier: 69 · confirmed transaction</small></span><span aria-hidden="true">↗</span></a>
-          <div className="proof-awaiting"><span>04</span><span><strong>Allocation → payment → rejected transfer</strong><small>Awaiting free test gas and mined transactions. No simulated receipt is shown.</small></span><span aria-hidden="true">…</span></div>
+          <a href={`${explorer}${transactions.transactions.mint.hash}`} target="_blank" rel="noopener noreferrer"><span>04</span><span><strong>20 credits were minted.</strong><small>Prepared participant · receipt status 1</small></span><span aria-hidden="true">↗</span></a>
+          <a href={`${explorer}${transactions.transactions.payment.hash}`} target="_blank" rel="noopener noreferrer"><span>05</span><span><strong>5 credits reached Corner Table.</strong><small>Eligible merchant · receipt status 1</small></span><span aria-hidden="true">↗</span></a>
+          <a className="proof-declined" href={`${explorer}${transactions.transactions.rejection.hash}`} target="_blank" rel="noopener noreferrer"><span>06</span><span><strong>1 credit could not leave.</strong><small>Outsider level 1 · configured rule 69 · receipt status 0</small></span><span aria-hidden="true">↗</span></a>
         </div>
         <div className="proof-bottom"><span>CVA · <code>{evidence.cva}</code></span><a href={`https://testnet.monadscan.com/address/${evidence.cva}`} target="_blank" rel="noopener noreferrer">Inspect token contract ↗</a></div>
       </section>
       <section id="limits" className="limits-section" aria-labelledby="limits-title">
         <div className="limits-stamp" aria-hidden="true">TEST<br />ONLY<br />↗</div>
         <div className="limits-copy"><p className="eyebrow">04 / A QUICK NOTE BEFORE YOU GO</p><h2 id="limits-title">A city-sized idea.<br /><em>Not a city program.</em></h2><p>No government partner. No real residency checks or identity documents. No fiat, cash redemption, or production compliance claim. Just an honest, testnet-sized experiment in keeping a benefit inside an eligible group.</p></div>
-        <div className="limits-invitation"><span>THIS WAY TO THE DEMO</span><p>The voucher, the merchant, the balance—and eventually the real payment proof—live here.</p><Link href="/workspace" className="button-primary">Enter the sandbox <span aria-hidden="true">↗</span></Link><small>Prepared test accounts · Monad testnet · No wallet needed to inspect</small></div>
+        <div className="limits-invitation"><span>THIS WAY TO THE DEMO</span><p>The voucher, the merchant, the live balance—and the real receipts—live here.</p><Link href="/workspace" className="button-primary">Enter the sandbox <span aria-hidden="true">↗</span></Link><small>Prepared test accounts · Monad testnet · No wallet needed to inspect</small></div>
       </section>
       <footer className="site-footer"><span>CITY MONEY / FICTIONAL SANDBOX</span><div><a href="https://github.com/emmaGH1/city-money" target="_blank" rel="noopener noreferrer">SOURCE &amp; LICENSE ↗</a><a href={`https://testnet.monadscan.com/address/${evidence.cva}`} target="_blank" rel="noopener noreferrer">ISSUED CVA ↗</a></div></footer>
     </main>
