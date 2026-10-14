@@ -1,37 +1,87 @@
 # City Money
 
-A fictional civic-voucher sandbox on Monad testnet, using a **genuine issued Cleanverse CVA**. The five-section landing and workspace read live balances and link real mint/payment/rejection receipts. The approved **bounded interactive checkout** uses only a prepared participant test-wallet key held as a server secret; an actual 1-credit browser payment has been confirmed on-chain.
+**A little goes around here.**
 
-**Live site:** https://city-money.vercel.app · **[2:49 founder-led product film](https://city-money-demo.vercel.app)** with Emma's voice, single-line subtitles and quiet CC BY music (the original 2:47 checkpoint cut remains linked on that page) · [judge route and limitations](docs/DEMO.md). Checkout was browser-tested on desktop and 390px/320px widths, including confirmed payment, exact-byte recovery after an interrupted response, storage refusal without broadcast, focus, offline/recovery and reduced motion. No login or Vercel account is needed. The capped public allowance is shared: 18 slots remained immediately after filming, not 18 per visitor. Always read live availability.
+City Money is a neighborhood voucher experience built around one simple idea: **what if community credits could only reach eligible recipients?**
 
-[Download synchronized SRT subtitles](https://city-money-demo.vercel.app/city-money-polished.srt). On phones, use the film page's fullscreen control and landscape orientation; the wide product walkthrough is small in a 320px inline player.
+A participant receives credits, spends them with a neighborhood merchant, and sees the payment settle on-chain. When someone tries to send those same credits to an ineligible wallet, the asset's rules stop the transfer. **Cleanverse enforces eligibility inside the token. Monad makes the outcome verifiable.**
 
-CVA: [`0x78e12fC329564D6E28d79ed81a009c0215d5Ec8D`](https://testnet.monadscan.com/address/0x78e12fC329564D6E28d79ed81a009c0215d5Ec8D). [Issuance](https://testnet.monadscan.com/tx/0xea8ee6b36e7a4abfd17dd0b6e55a4f1e7e9ab6f21c65f2c7c0160485f8dc8d23) · [20-credit mint](https://testnet.monadscan.com/tx/0xd8f0bc7a9916ffb62d6ae4cb8bc05a90dae24c83421b7f5651f553aed93d644e) · [5-credit merchant payment](https://testnet.monadscan.com/tx/0xe7a0b0f665acfa70d04b4e58f0abb85b2cf14faf102b3074afe4a36709b68f9e) · [mined outsider rejection](https://testnet.monadscan.com/tx/0xd0e56e57f39f58fd114f894e3bbbb74afa00853d424bc852760480fdd7f66c77). Status of the last receipt is **0**; its transaction trace, real CVI lookup, rule values and unchanged balances are recorded in [the transaction evidence](docs/transaction-evidence.json). On Monad, gas is charged by the declared *limit*, so a reverted receipt showing the full gas limit is not by itself an out-of-gas diagnosis.
+This is an interactive product prototype, not a concept deck. The site includes a working checkout, live testnet balances, a policy check and independent transaction evidence.
 
-Actual proven journey: participant received 20 test credits → paid 5 to the prepared merchant → sending 1 to the lower-level test identity reverted in the Cleanverse policy verifier. Balances after that rejected transfer remained 15 / 5 / 0; supply stayed 20. The subsequent [actual 1-credit browser checkout](https://testnet.monadscan.com/tx/0xf7867b4baf3d41363f98b916c0a67c803bb518018ec88e41b420e0dba5c2acad) succeeded in block 70763567: participant 15→14, merchant 5→6, outsider 0, supply 20. Historical block reads and the exact Transfer event independently confirmed that delta. The fresh outsider button separately returned policy rejection in **eth_call**, without broadcasting. No real government, money, residency verification or automatic token-expiry claims.
+## Explore City Money
 
-The newer judge allowance was privately funded with 105 additional test-only credits (total supply 125); this did not replay the original 20-credit allocation. During founder filming a fresh [one-credit checkout](https://testnet.monadscan.com/tx/0x15466231d1cb4c6953a7f447a9e63d7eabad88144682d1e3ba0b7e31c16c37db) succeeded in block 70799023, participant 117→116 and merchant 8→9, one exact Transfer event. Two earlier 1-credit QA payments separately proved normal confirmation and exact-byte interruption recovery. The live boundary comparison still checks level 1 against the configured 69 threshold without broadcasting; the historical mined failure remains independently inspectable.
+| | Link |
+| --- | --- |
+| **Live product** | [city-money.vercel.app](https://city-money.vercel.app) |
+| **Try the checkout** | [Open the workspace](https://city-money.vercel.app/workspace) |
+| **Watch the founder demo** | [City Money product film](https://city-money-demo.vercel.app) |
+| **Judge walkthrough** | [Demo route and what is verified](docs/DEMO.md) |
+| **On-chain token** | [CITYCM on MonadScan](https://testnet.monadscan.com/address/0x78e12fC329564D6E28d79ed81a009c0215d5Ec8D) |
 
-## Local development
+**Start with the product film**, then open the workspace to try the same journey yourself. No login or wallet connection is required.
 
-Requires Node.js 24. Read-only UI and balance routes need no private credentials. Checkout additionally needs the prepared participant key as `CITY_MONEY_TEST_PARTICIPANT_PRIVATE_KEY` on the server; without it checkout is unavailable. Private operator/probe commands require securely provisioned `CLEANVERSE_SANDBOX_API_ID_NEW` / `CLEANVERSE_SANDBOX_API_KEY_NEW` and the existing encrypted wallet vault.
+## The experience
 
-```sh
+1. **Receive.** Enter the workspace and inspect the prepared participant's CITYCM balance, backed by a genuine issued Cleanverse verified asset (CVA).
+2. **Spend.** Choose 1–5 CITYCM credits, review the fixed **Corner Table** merchant and confirm. If shared checkout capacity remains, the app broadcasts a real Monad testnet payment and shows its transaction and updated balances.
+3. **See the boundary.** Check what happens when credits are directed toward an ineligible recipient. The live boundary button performs a read-only policy check. A separate historical on-chain transaction demonstrates the same rule rejecting a mined transfer.
+
+The crucial detail: eligibility is **not just a disabled button or a website rule**. The issued asset applies its configured Cleanverse rule to transfers.
+
+## What makes it work
+
+- **Cleanverse CVI:** prepared test identities with assigned levels represent a participant, an eligible merchant and an outsider.
+- **Cleanverse CVA:** an issued CITYCM asset checks the configured identity-level threshold before allowing transfers.
+- **Monad testnet:** successful payments and rejected transactions have independently inspectable chain records.
+- **City Money workspace:** a focused voucher checkout presents balances, merchant details, review, transaction status and recovery controls without making judges set up a wallet.
+
+The product's transfer rule currently requires an identity level of at least **69**. The prepared participant and Corner Table each have level **70**; the test outsider has level **1**. These are test registrations, not real-world residency or identity verification.
+
+## Proof, not placeholders
+
+| Claim | Evidence |
+| --- | --- |
+| CITYCM was issued as a Cleanverse verified asset | [Issuance transaction](https://testnet.monadscan.com/tx/0xea8ee6b36e7a4abfd17dd0b6e55a4f1e7e9ab6f21c65f2c7c0160485f8dc8d23) |
+| Credits reached the eligible merchant | [Confirmed 5-CITYCM payment](https://testnet.monadscan.com/tx/0xe7a0b0f665acfa70d04b4e58f0abb85b2cf14faf102b3074afe4a36709b68f9e) |
+| An ineligible transfer was rejected by the asset | [Mined rejected transaction](https://testnet.monadscan.com/tx/0xd0e56e57f39f58fd114f894e3bbbb74afa00853d424bc852760480fdd7f66c77) |
+| A user completed checkout through the live browser | [Filmed 1-CITYCM payment](https://testnet.monadscan.com/tx/0x15466231d1cb4c6953a7f447a9e63d7eabad88144682d1e3ba0b7e31c16c37db) |
+
+The founder demo includes the real 1-credit checkout and its confirmation at normal speed. In that filmed transaction, the participant balance moved from **117 to 116** and the merchant balance from **8 to 9**. The separately linked rejected transaction has receipt status **0**; it is not a fabricated UI state or the result of clicking the live read-only boundary button.
+
+For reproducible addresses, rules and receipt details, see [transaction evidence](docs/transaction-evidence.json).
+
+## Built with
+
+**Next.js 16, React 19, TypeScript, shadcn/ui and Radix UI** for the web experience; **Cleanverse CVI/CVA** for test-identity and token-transfer eligibility; **ethers.js** for transaction handling; **Monad testnet** for settlement and verifiable evidence; **Vercel** for deployment.
+
+The checkout uses a prepared **test-only participant wallet**, signed on the server. It limits transfers to the fixed Corner Table merchant and 1–5 whole credits. Signed transaction bytes are saved before broadcasting so an interrupted response can be recovered without silently creating another payment. The issuer/admin key is not deployed to the public app.
+
+## Run locally
+
+Requires Node.js 24.
+
+```bash
 npm ci
 npm run dev
-npm run lint
-npm run typecheck
-npm run build
-npm test
-npm audit --audit-level=moderate
-npm run probe -- wallets
-node scripts/cva-actions.mjs status
 ```
 
-The probe stores test wallets encrypted outside this repository. The bounded `cva-actions.mjs` harness performs on-chain actions from those same wallets after querying active Cleanverse CVIs and rule state. It records public transaction evidence, never wallet keys. API calls use the Cleanverse UAT environment only. The public checkout uses `CITY_MONEY_TEST_PARTICIPANT_PRIVATE_KEY` server-side, never an issuer/API key. Only the fixed Corner Table receiver and whole 1–5 CITYCM amounts are accepted. There are **24 total live nonce slots after the historical rejection**, including the earlier one-credit checkout. Public signing permits nonces 2–23; nonces24–25 require protected recording access. The participant is separately funded with105 additional test credits and native gas capped at1.44 test MON. The original20-credit allocation remains historical, not an allocation repeated on arrival. At least one credit is retained, merchant balance is capped at125, and each signed transaction is capped at0.06 test MON and300,000 gas. Preparation returns signed transaction bytes and their hash; the browser persists these before broadcasting. Interrupted submissions may recheck or resend **the exact same signed bytes**, never silently sign a fresh payment. Monad’s nonce enforces one execution across concurrent serverless instances; a competing transaction using the nonce is reported as superseded, not success. Successful immediate and recovered receipts must match the exact token Transfer event. No issuer key or Cleanverse credential is deployed. No public mint, reset or identity administration exists. The outsider button is **read-only** and cannot spend gas or broadcast; the genuine mined failure remains separately linked. Registration labels are snapshots; actual transfers run the CVA policy. Never commit credentials or print private keys. On a fresh machine, securely restore the existing vault before running `probe wallets`, or it creates unrelated wallets. Read [the handoff](docs/HANDOFF.md).
+Open [localhost:3000](http://localhost:3000). The site and read-only views can run without private credentials. To enable the bounded test checkout, configure `CITY_MONEY_TEST_PARTICIPANT_PRIVATE_KEY` as a **server-only** environment variable using an authorized test wallet. Do not commit secrets or reuse a real-funds wallet.
 
-The initial deployment had deliberately untested exhaustion/concurrency/interruption cases. The revised source adds controlled-provider tests for these failure classes, signed-payload validation and exact event verification. Check docs/HANDOFF.md for the latest browser validation; mocked provider tests do not prove public RPC behavior or real cross-instance contention. No public reset; use real historical receipts and the read-only boundary if the shared cap is exhausted.
+Validation commands:
 
-AI assistance: developed with Devin, with scope and design direction approved by Emma. The prototype is not production-ready or regulatory advice. No merge or hackathon submission has been made.
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
 
-License: MIT.
+See [technical handoff](docs/HANDOFF.md) for operations, safety limits and additional setup.
+
+## Scope and transparency
+
+City Money demonstrates a **possible neighborhood-benefit model on testnet**. The neighborhood, merchant and program are fictional; the Cleanverse CVA and linked Monad transactions are real testnet artifacts. There is no government affiliation, fiat redemption, real residency/KYC verification or production compliance claim. The current eligibility rule checks a test identity level, **not geography or merchant licensing**.
+
+Interactive checkout draws from a **shared, capped test allowance**, not an individual allocation for each visitor. Availability can change. If it is exhausted, the live read-only policy check, the founder film and all historical transaction links remain available. The project is a prototype, not a launched payments network.
+
+**License:** MIT.
