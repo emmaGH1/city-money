@@ -1,6 +1,6 @@
 # City Money — judge walkthrough
 
-**Try the [live sandbox](https://city-money.vercel.app)** · **[Watch the founder demo](https://city-money-demo.vercel.app)** (2:47, Emma's authorized voice, open subtitles) · [Download SRT](https://city-money-demo.vercel.app/city-money.srt). The older unnarrated browser proof is available from the video page as an archive.
+**Try the [live sandbox](https://city-money.vercel.app)** · **[Watch the founder demo](https://city-money-demo.vercel.app)** (2:49 polished cut, Emma's authorized voice, single-line open subtitles) · [Download SRT](https://city-money-demo.vercel.app/city-money-polished.srt). The polished cut reuses the same normal-speed capture and genuine filmed payment described below, so its browser footage shows the pre-redesign interface; it adds a framed presentation, a voucher-wipe transition, a lower caption rail and “Bossa Antigua” by Kevin MacLeod (incompetech.com, CC BY 4.0) at 12% under the narration. The timings below refer to the original 2:47 checkpoint cut, which stays available unchanged. The older unnarrated browser proof is available from the video page as an archive.
 
 ## The product in one journey
 
