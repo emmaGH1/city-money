@@ -1,0 +1,78 @@
+name: City Money clean demo capture
+on:
+  push:
+    branches: [demo-capture-20261014]
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright
+      - run: npx playwright install --with-deps chromium
+      - name: Record public site safely
+        run: |
+          cat > /tmp/capture.mjs <<'EOF'
+          import { chromium } from '${{ github.workspace }}/node_modules/playwright/index.mjs';
+          import fs from 'node:fs/promises';
+          const root='https://city-money.vercel.app';
+          const out='capture';
+          await fs.mkdir(out,{recursive:true});
+          const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+          const delay=ms=>new Promise(r=>setTimeout(r,ms));
+          async function capture(name,url,steps){
+            const ctx=await browser.newContext({viewport:{width:1600,height:900},deviceScaleFactor:1,recordVideo:{dir:out,size:{width:1600,height:900}}});
+            const page=await ctx.newPage();
+            await page.route('**/api/checkout**',route=>route.request().method()==='GET'?route.continue():route.fulfill({status:403,contentType:'application/json',body:'{"error":"No transactions in demo recording"}'}));
+            page.on('console', m=>{if(m.type()==='error')console.log('CONSOLE',name,m.text().slice(0,180));});
+            try{
+              await page.goto(url,{waitUntil:'domcontentloaded',timeout:45000});
+              await delay(1800); await steps(page);
+              await delay(700);
+            }catch(err){console.log('FAILED SCENE',name,String(err));await delay(1200);}
+            const vid=page.video();await ctx.close();if(vid)await fs.rename(await vid.path(),out+'/'+name+'.webm');
+            console.log('CAPTURED',name);
+          }
+          try{
+            await capture('01-landing',root,async p=>{
+              await p.locator('#hero-title').waitFor({timeout:15000});
+              await p.mouse.move(1200,320,{steps:28}); await delay(3400);
+              await p.mouse.move(770,650,{steps:28}); await delay(2400);
+            });
+            await capture('02-mechanism',root,async p=>{
+              await p.locator('.mechanism').first().scrollIntoViewIfNeeded();await delay(4300);
+              await p.locator('#how-it-works').scrollIntoViewIfNeeded();await delay(3000);
+            });
+            await capture('03-workspace',root+'/workspace',async p=>{
+              await p.locator('.voucher-panel').waitFor({timeout:16000});await delay(5200);
+              await p.mouse.move(605,430,{steps:36});await delay(3000);
+            });
+            await capture('04-review',root+'/workspace',async p=>{
+              await p.locator('.voucher-panel').waitFor({timeout:16000});await delay(2700);
+              const b=p.getByRole('button',{name:/Review payment to Corner Table/i});
+              if(await b.isEnabled()){await b.click();await delay(6200);await p.keyboard.press('Escape');await delay(1200)}
+              else {console.log('Checkout unavailable, do not stage fake review');await delay(5500)}
+            });
+            await capture('05-policy',root+'/workspace',async p=>{
+              await p.locator('.boundary-panel').scrollIntoViewIfNeeded();await delay(3100);
+              const b=p.getByRole('button',{name:/Check outsider transfer/i});
+              if(await b.isEnabled())await b.click();await delay(6200);
+            });
+            await capture('06-proof',root,async p=>{
+              await p.locator('#proof').scrollIntoViewIfNeeded();await delay(7800);
+            });
+            await capture('07-success', 'https://testnet.monadscan.com/tx/0x15466231d1cb4c6953a7f447a9e63d7eabad88144682d1e3ba0b7e31c16c37db',async p=>{await delay(6000)});
+            await capture('08-rejected','https://testnet.monadscan.com/tx/0xd0e56e57f39f58fd114f894e3bbbb74afa00853d424bc852760480fdd7f66c77',async p=>{await delay(6000)});
+          }finally{await browser.close()}
+          EOF
+          node /tmp/capture.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: city-money-clean-capture
+          path: capture/*.webm
+          if-no-files-found: warn
+          retention-days: 1
