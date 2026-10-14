@@ -1,0 +1,4 @@
+/* Keep the new neighborhood mark upright and legible at every header size. */
+.wordmark .logo-mark { width: 45px; height: 39px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; transform: none; color: inherit; }
+.logo-mark img { display: block; width: 100%; height: 100%; object-fit: contain; }
+@media (max-width: 760px) { .wordmark { gap: 9px; } .wordmark .logo-mark { width: 38px; height: 34px; } }
